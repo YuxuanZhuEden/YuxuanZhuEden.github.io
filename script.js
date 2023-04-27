@@ -319,7 +319,7 @@ window.addEventListener('load', function () {
             }
             this.enemies.forEach(enemy => {
                 enemy.update();
-                if (this.checkCollision(this.player, enemy) && this.gameOver === true) {
+                if (this.checkCollision(this.player, enemy) && this.gameOver === false) {
                     enemy.markedForDeletion = true;
                     if (enemy.type === 'lucky') this.player.enterPowerUp();
                     else this.score -= enemy.lives;
