@@ -136,7 +136,7 @@ window.addEventListener('load', function () {
             this.maxFrame = 37;
         }
         update() {
-            this.x += this.speedX - this.game.speed;
+            this.x += (this.speedX - this.game.speed);
             if (this.x + this.width < 0) this.markedForDeletion = true;
             if (this.frameX < this.maxFrame) {
                 this.frameX++;
@@ -195,11 +195,26 @@ window.addEventListener('load', function () {
             this.height = 227;
             this.y = Math.random() * (this.game.height * 0.9 - this.height);
             this.image = document.getElementById('hivewhale');
-            this.frameY = Math.floor(Math.random() * 2);
+            this.frameY = 0;
             this.lives = 15;
             this.score = 15;
             this.type = 'hive';
             this.speedX = Math.random() * -1.2 - 0.2;
+        }
+    }
+    class Drone extends Enemy {
+        constructor(game, x, y) {
+            super(game);
+            this.width = 115;
+            this.height = 95;
+            this.x = x;
+            this.y = y;
+            this.image = document.getElementById('drone');
+            this.frameY = Math.floor(Math.random() * 2);
+            this.lives = 10;
+            this.score = this.lives;
+            this.type = 'drone';
+            this.speedX = Math.random() * -10 - 2;
         }
     }
 
@@ -215,7 +230,7 @@ window.addEventListener('load', function () {
         }
         update() {
             if (this.x <= -this.width) this.x = 0;
-            else this.x -= this.game.speed * this.speedModifier;
+            else this.x -= this.game.speed * this.speedModifier - 0.5;
         }
         draw(context) {
             context.drawImage(this.image, this.x, this.y);
@@ -245,15 +260,14 @@ window.addEventListener('load', function () {
     class UI {
         constructor(game) {
             this.game = game;
-            this.fontSize = this.game.height;
             this.fontFamily = 'Bangers';
             this.color = 'white';
         }
         draw(context) {
             context.save();
             context.fillStyle = this.color;
-            context.shadowOffsetX = 2;
-            context.shadowOffsetY = 2;
+            context.shadowOffsetX = 4;
+            context.shadowOffsetY = 4;
             context.shadowColor = 'black';
             context.font = '20px ' + this.fontFamily;
             context.fillText('Score: ' + this.game.score, 20, 40);
@@ -273,10 +287,9 @@ window.addEventListener('load', function () {
                     message1 = "you lose!";
                     message2 = "try again next time!";
                 }
-                context.font = '200px ' + this.fontFamily;
+                context.font = '150px ' + this.fontFamily;
                 context.fillText(message1, this.game.width / 2, this.game.height / 1.2, this.game.width - this.game.width / 9, this.game.height / 3);
                 context.fillText(message2, this.game.width / 2, this.game.height / 2, this.game.width - this.game.width / 9, this.game.height / 3);
-
             }
             context.restore();
         }
@@ -296,7 +309,7 @@ window.addEventListener('load', function () {
             this.ammo = 20;
             this.maxAmmo = 50;
             this.ammoTimer = 0;
-            this.ammoInterval = 500;
+            this.ammoInterval = 400;
             this.gameOver = false;
             this.score = 0;
             this.winningScore = 100;
@@ -331,6 +344,13 @@ window.addEventListener('load', function () {
                         projectile.markedForDeletion = true;
                         if (enemy.lives <= 0) {
                             enemy.markedForDeletion = true;
+                            if (enemy.type === 'hive') {
+                                this.enemies.push(new Drone(this, enemy.x, Math.random() * this.height));
+                                this.enemies.push(new Drone(this, enemy.x, Math.random() * this.height));
+                                this.enemies.push(new Drone(this, enemy.x, Math.random() * this.height));
+                                this.enemies.push(new Drone(this, enemy.x, Math.random() * this.height));
+                                this.enemies.push(new Drone(this, enemy.x, Math.random() * this.height));
+                            }
                             if (!this.gameOver) this.score += enemy.score;
                             if (this.score > this.winningScore) this.gameOver = true;
                         }
@@ -359,7 +379,6 @@ window.addEventListener('load', function () {
             else if (randomize < 0.4) this.enemies.push(new Angler2(this));
             else if (randomize < 0.6) this.enemies.push(new LuckyFish(this));
             else this.enemies.push(new HiveWhale(this));
-
         }
         checkCollision(rect1, rect2) {
             return (rect1.x < rect2.x + rect2.width &&
