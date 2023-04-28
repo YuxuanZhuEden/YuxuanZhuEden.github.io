@@ -276,11 +276,12 @@ window.addEventListener('load', function () {
             }
             const formattedTime = (this.game.gameTime * 0.001).toFixed(1);
             context.fillText('Timer: ' + formattedTime, 20, 100);
+            context.fillText('HP: ' + this.game.lives, 20, 125);
             if (this.game.gameOver) {
                 context.textAlign = 'center';
                 let message1;
                 let message2;
-                if (this.game.score > this.game.winningScore) {
+                if (this.game.score >= this.game.winningScore) {
                     message1 = "you win!";
                     message2 = "congraulations!";
                 } else {
@@ -317,11 +318,12 @@ window.addEventListener('load', function () {
             this.timeLimit = 60000 * 3;
             this.speed = 1;
             this.debug = false;
+            this.lives = 100;
 
         }
         update(deltaTime) {
             if (!this.gameOver) this.gameTime += deltaTime;
-            if (this.gameTime > this.timeLimit) this.gameOver = true;
+            if (this.gameTime > this.timeLimit || this.lives <= 0) this.gameOver = true;
             this.background.update();
             this.player.update(deltaTime);
             if (this.ammoTimer > this.ammoInterval) {
@@ -332,10 +334,10 @@ window.addEventListener('load', function () {
             }
             this.enemies.forEach(enemy => {
                 enemy.update();
-                if (this.checkCollision(this.player, enemy) && this.gameOver === false) {
+                if (this.checkCollision(this.player, enemy)) {
                     enemy.markedForDeletion = true;
                     if (enemy.type === 'lucky') this.player.enterPowerUp();
-                    else this.score -= enemy.lives;
+                    else if (this.gameOver) this.lives -= enemy.lives;
 
                 }
                 this.player.projectiles.forEach(projectile => {
@@ -352,7 +354,7 @@ window.addEventListener('load', function () {
                                 this.enemies.push(new Drone(this, enemy.x, Math.random() * this.height));
                             }
                             if (!this.gameOver) this.score += enemy.score;
-                            if (this.score > this.winningScore) this.gameOver = true;
+                            if (this.score >= this.winningScore) this.gameOver = true;
                         }
                     }
                 })
