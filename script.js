@@ -61,7 +61,7 @@ window.addEventListener('load', function () {
             this.frameY = 0;
             this.maxFrame = 37;
             this.speedy = 0;
-            this.maxSpeed = 10;
+            this.maxSpeed = 5;
             this.projectiles = [];
             this.image = document.getElementById('player');
             this.powerUp = false;
@@ -69,12 +69,13 @@ window.addEventListener('load', function () {
             this.powerUpLimit = 10000;
         }
         update(deltaTime) {
-            if (this.game.keys.includes('ArrowUp')) this.speedy = -this.maxSpeed;
-            else if (this.game.keys.includes('ArrowDown')) this.speedy = this.maxSpeed;
+            if (this.game.keys.includes('ArrowUp') && this.game.lives > 0) this.speedy = -this.maxSpeed;
+            else if (this.game.keys.includes('ArrowDown') && this.game.lives > 0) this.speedy = this.maxSpeed;
             else this.speedy = 0;
+            if (this.game.lives <= 0) this.y += 10;
             this.y += this.speedy;
             if (this.y + this.height * 0.5 > this.game.height) this.y -= this.maxSpeed;
-            if (this.y + this.height * 0.5 < this.game.height - this.game.height) this.y += this.maxSpeed;
+            if (this.y + this.height * 0.5 < this.game.height - this.game.height && this.game.lives >= 0) this.y += this.maxSpeed;
             this.projectiles.forEach(projectile => {
                 projectile.update();
             });
@@ -105,14 +106,16 @@ window.addEventListener('load', function () {
 
         }
         shootTop() {
-            if (this.game.ammo > 0) {
+            if (this.game.ammo > 0 && this.game.gameOver === false) {
                 this.projectiles.push(new Projectile(this.game, this.x + 80, this.y + 30));
                 this.game.ammo--;
             }
             if (this.powerUp) this.shootBottom();
+            var audio = new Audio('assets/short_gun_sound.mp3');
+            audio.play();
         }
         shootBottom() {
-            if (this.game.ammo > 0) {
+            if (this.game.ammo > 0 && this.game.gameOver === false) {
                 this.projectiles.push(new Projectile(this.game, this.x + 80, this.y + 175));
                 this.game.ammo--;
             }
@@ -161,6 +164,8 @@ window.addEventListener('load', function () {
             this.frameY = Math.floor(Math.random() * 3);
             this.lives = 2;
             this.score = this.lives;
+            this.type = 'nonlucky';
+
         }
     }
     class Angler2 extends Enemy {
@@ -173,6 +178,7 @@ window.addEventListener('load', function () {
             this.frameY = Math.floor(Math.random() * 2);
             this.lives = 3;
             this.score = this.lives;
+            this.type = 'nonlucky';
         }
     }
     class LuckyFish extends Enemy {
@@ -217,7 +223,23 @@ window.addEventListener('load', function () {
             this.speedX = Math.random() * -10 - 2;
         }
     }
+    class Healing extends Enemy {
+        constructor(game) {
+            super(game);
+            this.width = 125;
+            this.height = 105;
+            this.x = this.game.width;
+            this.y = Math.random() * (this.game.height * 0.9 - this.height);;
+            this.image = document.getElementById('healthpackage');
+            this.speedX = Math.random() * -10 - 2;
+            this.type = 'heal';
+        }
+        draw(context) {
+            if (this.game.debug) context.strokeRect(this.x, this.y, this.width, this.height);
+            context.drawImage(this.image, this.x, this.y);
+        }
 
+    }
     class Layer {
         constructor(game, image, speedModifier) {
             this.game = game;
@@ -284,6 +306,10 @@ window.addEventListener('load', function () {
                 if (this.game.score >= this.game.winningScore) {
                     message1 = "you win!";
                     message2 = "congraulations!";
+                } else if (this.game.lives <= 0) {
+                    message1 = "Get my repair kit and try again!";
+                    message2 = "Blazes!";
+
                 } else {
                     message1 = "you lose!";
                     message2 = "try again next time!";
@@ -313,13 +339,13 @@ window.addEventListener('load', function () {
             this.ammoInterval = 400;
             this.gameOver = false;
             this.score = 0;
-            this.winningScore = 100;
+            this.winningScore = 500;
             this.gameTime = 0;
-            this.timeLimit = 60000 * 3;
+            this.timeLimit = 60000 * 30;
             this.speed = 1;
             this.debug = false;
             this.lives = 100;
-
+            this.menw = true;
         }
         update(deltaTime) {
             if (!this.gameOver) this.gameTime += deltaTime;
@@ -337,14 +363,16 @@ window.addEventListener('load', function () {
                 if (this.checkCollision(this.player, enemy)) {
                     enemy.markedForDeletion = true;
                     if (enemy.type === 'lucky') this.player.enterPowerUp();
-                    else if (this.gameOver) this.lives -= enemy.lives;
-
+                    else if (enemy.type !== 'lucky' && enemy.type !== 'heal' && this.lives + enemy.lives > 0 && this.gameOver === false) this.lives -= enemy.lives;
+                    else if (this.lives + enemy.lives < 0) this.lives = 0;
+                    if (enemy.type === 'heal' && this.lives + 10 <= 100 && this.gameOver === false) this.lives += 10;
+                    else if (enemy.type === 'heal' && this.lives + 10 >= 100 && this.gameOver === false) this.lives = 100;
                 }
                 this.player.projectiles.forEach(projectile => {
                     if (this.checkCollision(projectile, enemy)) {
-                        enemy.lives--;
+                        if (enemy.type !== 'heal') enemy.lives--;
                         projectile.markedForDeletion = true;
-                        if (enemy.lives <= 0) {
+                        if (enemy.lives <= 0 && enemy.type) {
                             enemy.markedForDeletion = true;
                             if (enemy.type === 'hive') {
                                 this.enemies.push(new Drone(this, enemy.x, Math.random() * this.height));
@@ -377,10 +405,11 @@ window.addEventListener('load', function () {
         }
         addEnemy() {
             const randomize = Math.random();
-            if (randomize < 0.2) this.enemies.push(new Angler1(this));
-            else if (randomize < 0.4) this.enemies.push(new Angler2(this));
-            else if (randomize < 0.6) this.enemies.push(new LuckyFish(this));
-            else this.enemies.push(new HiveWhale(this));
+            if (randomize < 0.1) this.enemies.push(new Angler1(this));
+            else if (randomize < 0.3) this.enemies.push(new Angler2(this));
+            else if (randomize < 0.5) this.enemies.push(new LuckyFish(this));
+            else if (randomize < 0.7) this.enemies.push(new HiveWhale(this));
+            else this.enemies.push(new Healing(this));
         }
         checkCollision(rect1, rect2) {
             return (rect1.x < rect2.x + rect2.width &&
