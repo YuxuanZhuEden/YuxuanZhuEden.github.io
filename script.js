@@ -389,12 +389,12 @@ window.addEventListener('load', function () {
                 if (enemy.type === 'hive' && enemy.y > this.player.y) enemy.y -= 1;
                 if (enemy.type === 'unlucky' && enemy.y < this.player.y) enemy.y += 2;
                 if (enemy.type === 'unlucky' && enemy.y > this.player.y) enemy.y -= 2;
-                if (this.checkProjectileHit(this.player.projectiles, enemy)) {
-                    if (enemy.type === 'blaster') enemy.y += enemy.height;
-                    if (enemy.type === 'drone') enemy.y += enemy.height;
-                    if (enemy.type === 'hive') enemy.y += enemy.height;
-                    if (enemy.type === 'unlucky') enemy.y += enemy.height;
-                }
+                // if (this.checkProjectileHit(this.player.projectiles, enemy)) {
+                //     if (enemy.type === 'blaster') enemy.y += enemy.height;
+                //     if (enemy.type === 'drone') enemy.y += enemy.height;
+                //     if (enemy.type === 'hive') enemy.y += enemy.height;
+                //     if (enemy.type === 'unlucky') enemy.y += enemy.height;
+                // }
 
                 if (this.checkCollision(this.player, enemy)) {
                     enemy.markedForDeletion = true;
