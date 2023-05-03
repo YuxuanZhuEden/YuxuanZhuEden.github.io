@@ -115,8 +115,6 @@ window.addEventListener('load', function () {
                 this.game.ammo--;
             }
             if (this.powerUp) this.shootBottom();
-            var audio = new Audio('assets/short_gun_sound.mp3');
-            audio.play();
         }
         shootBottom() {
             if (this.game.ammo > 0 && this.game.gameOver === false) {
@@ -272,8 +270,10 @@ window.addEventListener('load', function () {
             this.y = 0;
         }
         update() {
-            if (this.x <= -this.width) this.x = 0;
-            else this.x -= this.game.speed * this.speedModifier - 0.5;
+            if (this.game.gameOver === false) {
+                if (this.x <= -this.width && this.gameOver === false) this.x = 0;
+                else this.x -= this.game.speed * this.speedModifier - 0.5;
+            }
         }
         draw(context) {
             context.drawImage(this.image, this.x, this.y);
@@ -387,15 +387,22 @@ window.addEventListener('load', function () {
                 if (enemy.type === 'drone' && enemy.y > this.player.y) enemy.y -= 5;
                 if (enemy.type === 'hive' && enemy.y < this.player.y) enemy.y += 1;
                 if (enemy.type === 'hive' && enemy.y > this.player.y) enemy.y -= 1;
-                if (enemy.type === 'unlucky' && enemy.y < this.player.y) enemy.y += 0.2;
-                if (enemy.type === 'unlucky' && enemy.y > this.player.y) enemy.y -= 0.2;
+                if (enemy.type === 'unlucky' && enemy.y < this.player.y) enemy.y += 2;
+                if (enemy.type === 'unlucky' && enemy.y > this.player.y) enemy.y -= 2;
+                if (this.checkProjectileHit(this.player.projectiles, enemy)) {
+                    if (enemy.type === 'blaster') enemy.y += enemy.height;
+                    if (enemy.type === 'drone') enemy.y += enemy.height;
+                    if (enemy.type === 'hive') enemy.y += enemy.height;
+                    if (enemy.type === 'unlucky') enemy.y += enemy.height;
+                }
+
                 if (this.checkCollision(this.player, enemy)) {
                     enemy.markedForDeletion = true;
                     if (enemy.type === 'lucky' && this.lives > 0) this.player.enterPowerUp();
                     else if (enemy.type !== 'ammo' && enemy.type !== 'lucky' && enemy.type !== 'heal' && this.lives + enemy.lives > 0 && this.gameOver === false) this.lives -= enemy.lives;
                     else if (this.lives + enemy.lives < 0) this.lives = 0;
                     if (enemy.type === 'heal' && this.lives + 15 <= 100 && this.gameOver === false) this.lives += 15;
-                    else if (enemy.type === 'heal' && this.lives + 10 >= 100 && this.gameOver === false) this.lives = 100;
+                    else if (enemy.type === 'heal' && this.lives + 10 > 100 && this.gameOver === false) this.lives = 100;
                     if (enemy.type === 'ammo' && this.gameOver === false) this.ammo += 25;
                 }
                 this.player.projectiles.forEach(projectile => {
@@ -447,6 +454,14 @@ window.addEventListener('load', function () {
                 rect1.x + rect1.width > rect2.x &&
                 rect1.y < rect2.y + rect2.height &&
                 rect1.height + rect1.y > rect2.y);
+        }
+        checkProjectileHit(projectiles, enemy) {
+            var a = projectiles.some(pic1 =>
+                pic1.y > enemy.y &&
+                pic1.y < enemy.y + enemy.height
+            );
+            console.log("a is " + a);
+            return a;
         }
     }
     const game = new Game(canvas.width, canvas.height);
