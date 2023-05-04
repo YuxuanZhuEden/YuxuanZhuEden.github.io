@@ -3,6 +3,9 @@
     padding: 0;
     box-sizing: border-box;
 }
+#security {
+    visibility: visible;
+}
 
 #canvas1 {
     border: 5px solid black;
@@ -14,6 +17,7 @@
     max-width: 100%;
     max-height: 100%;
     font-family: 'Bangers',cursive;
+    visibility: hidden;
 }
 
 #layer1,#layer2,#layer3,#layer4,#player,#angler1,#angler2,#lucky,#projectile,#hivewhale,#drone,#healthpackage,#ammo{

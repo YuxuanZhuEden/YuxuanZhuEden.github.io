@@ -271,12 +271,20 @@ window.addEventListener('load', function () {
         }
         update() {
             if (this.game.gameOver === false) {
-                if (this.x <= -this.width && this.gameOver === false) this.x = 0;
+                if (this.x <= -this.width) this.x = 0;
                 else this.x -= this.game.speed * this.speedModifier - 0.5;
             }
         }
         draw(context) {
             context.drawImage(this.image, this.x, this.y);
+        }
+    }
+    class Security {
+        constructor() {
+            this.password = "12345";
+        }
+        check(password) {
+            return this.password === password;
         }
     }
     class Background {
@@ -464,7 +472,26 @@ window.addEventListener('load', function () {
             return a;
         }
     }
+    function mySignIn() {
+        var password = document.getElementById("pass").value;
+        var isGranted = security.check(password);
+        if (isGranted) {
+            canvas.style.visibility = "visible";
+            securityDiv.style.visibility = "hidden";
+        } else {
+            canvas.style.visibility = "hidden";
+            securityDiv.style.visibility = "visible";
+        }
+    }
+
+
     const game = new Game(canvas.width, canvas.height);
+    const security = new Security();
+    const securityDiv = document.getElementById("security");
+    const submit = document.getElementById("submit");
+    submit.onclick = function () { mySignIn() };
+
+
     let lastTime = 0;
     function animate(timeStamp) {
         const deltaTime = timeStamp - lastTime;
