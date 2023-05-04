@@ -281,7 +281,7 @@ window.addEventListener('load', function () {
     }
     class Security {
         constructor() {
-            this.password = "12345";
+            this.password = "13245";
         }
         check(password) {
             return this.password === password;
