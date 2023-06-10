@@ -227,28 +227,6 @@ window.addEventListener('load', function () {
             this.speedX = Math.random() * -1.2 - 0.2;
         }
     }
-    class Boss extends Enemy {
-        constructor(game) {
-            super(game);
-            this.width = 100;
-            this.height = 200;
-            this.y = Math.random() * (this.game.height * 0.9 - this.height);;
-            this.image = document.getElementById('boss');
-            this.lives = 100;
-            this.score = this.lives;
-            this.type = 'boss';
-            this.speedX = Math.random() * -0.1 - 1;
-        }
-        draw(context) {
-            if (this.game.debug) {
-                context.strokeRect(this.x, this.y, this.width, this.height);
-                context.fillText(this.lives, this.x, this.y);
-            }
-            context.fillText("Army", 300, 100);
-            context.fillRect(350, 90, this.lives * 3, 10)
-            context.drawImage(this.image, this.x, this.y);
-        }
-    }
     class Healing extends Enemy {
         constructor(game) {
             super(game);
@@ -428,13 +406,6 @@ window.addEventListener('load', function () {
                 if (enemy.type === 'hive' && enemy.y > this.player.y) enemy.y -= 1;
                 if (enemy.type === 'nonlucky' && enemy.y < this.player.y) enemy.y += 2;
                 if (enemy.type === 'nonlucky' && enemy.y > this.player.y) enemy.y -= 2;
-                // if (this.checkProjectileHit(this.player.projectiles, enemy)) {
-                //     if (enemy.type === 'blaster') enemy.y += enemy.height;
-                //     if (enemy.type === 'drone') enemy.y += enemy.height;
-                //     if (enemy.type === 'hive') enemy.y += enemy.height;
-                //     if (enemy.type === 'unlucky') enemy.y += enemy.height;
-                // }
-
                 if (this.checkCollision(this.player, enemy)) {
                     enemy.markedForDeletion = true;
                     if (enemy.type === 'lucky' && this.lives > 0) this.player.enterPowerUp();
@@ -451,8 +422,6 @@ window.addEventListener('load', function () {
                         if (enemy.lives <= 0) {
                             enemy.markedForDeletion = true;
                             this.downEnemy++;
-                            const BossAtack = Math.random();
-                            if (enemy.type !== 'boss' && BossAtack < 0.5) this.enemies.push(new Boss(this));
                             if (enemy.type === 'hive') {
                                 this.enemies.push(new Drone(this, enemy.x, Math.random() * this.height));
                                 this.enemies.push(new Drone(this, enemy.x, Math.random() * this.height));
@@ -496,14 +465,6 @@ window.addEventListener('load', function () {
                 rect1.x + rect1.width > rect2.x &&
                 rect1.y < rect2.y + rect2.height &&
                 rect1.height + rect1.y > rect2.y);
-        }
-        checkProjectileHit(projectiles, enemy) {
-            var a = projectiles.some(pic1 =>
-                pic1.y > enemy.y &&
-                pic1.y < enemy.y + enemy.height
-            );
-            console.log("a is " + a);
-            return a;
         }
     }
     function mySignIn() {
