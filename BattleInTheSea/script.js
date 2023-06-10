@@ -119,7 +119,7 @@ window.addEventListener('load', function () {
             if (this.powerUp) this.shootBottom();
         }
         shootBottom() {
-            if (this.game.ammo > 0 && this.game.gameOver === false) {
+            if (this.game.ammo > 0) {
                 this.projectiles.push(new Projectile(this.game, this.x + 80, this.y + 175));
                 this.game.ammo--;
             }
@@ -185,19 +185,7 @@ window.addEventListener('load', function () {
             this.type = 'blaster';
         }
     }
-    class LuckyFish extends Enemy {
-        constructor(game) {
-            super(game);
-            this.width = 99;
-            this.height = 95;
-            this.y = Math.random() * (this.game.height * 0.9 - this.height);
-            this.image = document.getElementById('lucky');
-            this.frameY = Math.floor(Math.random() * 2);
-            this.lives = 3;
-            this.score = 15;
-            this.type = 'lucky';
-        }
-    }
+
     class HiveWhale extends Enemy {
         constructor(game) {
             super(game);
@@ -225,28 +213,6 @@ window.addEventListener('load', function () {
             this.score = this.lives;
             this.type = 'drone';
             this.speedX = Math.random() * -1.2 - 0.2;
-        }
-    }
-    class Boss extends Enemy {
-        constructor(game) {
-            super(game);
-            this.width = 100;
-            this.height = 200;
-            this.y = Math.random() * (this.game.height * 0.9 - this.height);;
-            this.image = document.getElementById('boss');
-            this.lives = 100;
-            this.score = this.lives;
-            this.type = 'boss';
-            this.speedX = Math.random() * -0.1 - 1;
-        }
-        draw(context) {
-            if (this.game.debug) {
-                context.strokeRect(this.x, this.y, this.width, this.height);
-                context.fillText(this.lives, this.x, this.y);
-            }
-            context.fillText("Army", 300, 100);
-            context.fillRect(350, 90, this.lives * 3, 10)
-            context.drawImage(this.image, this.x, this.y);
         }
     }
     class Healing extends Enemy {
@@ -301,6 +267,7 @@ window.addEventListener('load', function () {
         }
         draw(context) {
             context.drawImage(this.image, this.x, this.y);
+            context.drawImage(this.image, this.x + this.width, this.y);
         }
     }
     class Security {
@@ -351,6 +318,9 @@ window.addEventListener('load', function () {
             for (let i = 0; i < this.game.ammo; i++) {
                 context.fillRect(20 + 5 * i, 50, 3, 20);
             }
+            for (let i = this.game.backupammo; i > 0; i--) {
+                context.fillRect(950 - 5 * i, 50, 3, 20);
+            }
             const formattedTime = (this.game.gameTime * 0.001).toFixed(1);
             context.fillText('Timer: ' + formattedTime, 20, 100);
             context.fillText('HP: ' + this.game.lives, 20, 125);
@@ -363,6 +333,8 @@ window.addEventListener('load', function () {
                 if (this.game.score >= this.game.winningScore) {
                     message1 = "you win!";
                     message2 = "congraulations!";
+                    let base = document.getElementById('base');
+                    context.drawImage(base, 400, 200, 539, 198);
                 } else if (this.game.lives <= 0) {
                     message1 = "Get my repair kit and try again!";
                     message2 = "Blazes!";
@@ -390,10 +362,8 @@ window.addEventListener('load', function () {
             this.enemies = [];
             this.enemyTimer = 0;
             this.enemyInterval = 3000;
-            this.ammo = 20;
-            this.maxAmmo = 300;
-            this.ammoTimer = 0;
-            this.ammoInterval = 50;
+            this.ammo = 50;
+            this.backupammo = 3;
             this.gameOver = false;
             this.score = 0;
             this.winningScore = 500;
@@ -412,11 +382,9 @@ window.addEventListener('load', function () {
             if (this.gameTime > this.timeLimit || this.lives <= 0) this.gameOver = true;
             this.background.update();
             this.player.update(deltaTime);
-            if (this.ammoTimer > this.ammoInterval) {
-                if (this.ammo < this.maxAmmo) this.ammo++;
-                this.ammoTimer = 0;
-            } else {
-                this.ammoTimer += deltaTime;
+            if (this.ammo === 0 && this.backupammo > 0) {
+                this.ammo = 50;
+                this.backupammo--;
             }
             this.enemies.forEach(enemy => {
                 enemy.update();
@@ -428,13 +396,6 @@ window.addEventListener('load', function () {
                 if (enemy.type === 'hive' && enemy.y > this.player.y) enemy.y -= 1;
                 if (enemy.type === 'nonlucky' && enemy.y < this.player.y) enemy.y += 2;
                 if (enemy.type === 'nonlucky' && enemy.y > this.player.y) enemy.y -= 2;
-                // if (this.checkProjectileHit(this.player.projectiles, enemy)) {
-                //     if (enemy.type === 'blaster') enemy.y += enemy.height;
-                //     if (enemy.type === 'drone') enemy.y += enemy.height;
-                //     if (enemy.type === 'hive') enemy.y += enemy.height;
-                //     if (enemy.type === 'unlucky') enemy.y += enemy.height;
-                // }
-
                 if (this.checkCollision(this.player, enemy)) {
                     enemy.markedForDeletion = true;
                     if (enemy.type === 'lucky' && this.lives > 0) this.player.enterPowerUp();
@@ -442,7 +403,7 @@ window.addEventListener('load', function () {
                     else if (this.lives + enemy.lives < 0) this.lives = 0;
                     if (enemy.type === 'heal' && this.lives + 15 <= 100 && this.gameOver === false) this.lives += 15;
                     else if (enemy.type === 'heal' && this.lives + 15 > 100 && this.gameOver === false) this.lives = 100;
-                    if (enemy.type === 'ammo' && this.gameOver === false) this.ammo += 50;
+                    if (enemy.type === 'ammo' && this.gameOver === false) this.backupammo++;
                 }
                 this.player.projectiles.forEach(projectile => {
                     if (this.checkCollision(projectile, enemy)) {
@@ -451,8 +412,6 @@ window.addEventListener('load', function () {
                         if (enemy.lives <= 0) {
                             enemy.markedForDeletion = true;
                             this.downEnemy++;
-                            const BossAtack = Math.random();
-                            if (enemy.type !== 'boss' && BossAtack < 0.5) this.enemies.push(new Boss(this));
                             if (enemy.type === 'hive') {
                                 this.enemies.push(new Drone(this, enemy.x, Math.random() * this.height));
                                 this.enemies.push(new Drone(this, enemy.x, Math.random() * this.height));
@@ -484,10 +443,9 @@ window.addEventListener('load', function () {
         }
         addEnemy() {
             const randomize = Math.random();
-            if (randomize < 0.2) this.enemies.push(new Angler1(this));
-            else if (randomize < 0.4) this.enemies.push(new Angler2(this));
-            else if (randomize < 0.6) this.enemies.push(new LuckyFish(this));
-            else if (randomize < 0.8) this.enemies.push(new HiveWhale(this));
+            if (randomize < 0.3) this.enemies.push(new Angler1(this));
+            else if (randomize < 0.5) this.enemies.push(new Angler2(this));
+            else if (randomize < 0.7) this.enemies.push(new HiveWhale(this));
             else if (randomize < 0.9) this.enemies.push(new Healing(this));
             else this.enemies.push(new Ammo(this));
         }
@@ -496,14 +454,6 @@ window.addEventListener('load', function () {
                 rect1.x + rect1.width > rect2.x &&
                 rect1.y < rect2.y + rect2.height &&
                 rect1.height + rect1.y > rect2.y);
-        }
-        checkProjectileHit(projectiles, enemy) {
-            var a = projectiles.some(pic1 =>
-                pic1.y > enemy.y &&
-                pic1.y < enemy.y + enemy.height
-            );
-            console.log("a is " + a);
-            return a;
         }
     }
     function mySignIn() {
