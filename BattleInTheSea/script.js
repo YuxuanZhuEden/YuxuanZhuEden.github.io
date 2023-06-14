@@ -10,27 +10,32 @@ window.addEventListener('load', function () {
         constructor(game) {
             this.game = game;
             window.addEventListener('keydown', e => {
-                if (((e.key === 'ArrowUp') ||
-                    (e.key === 'ArrowDown')
-                ) && this.game.keys.indexOf(e.key) === -1) {
+                if ((e.key === 'ArrowUp' || e.key === 'ArrowDown') && this.game.keys.indexOf(e.key) === -1) {
                     this.game.keys.push(e.key);
                 } else if (e.key === ' ') {
                     this.game.player.shootTop();
                 } else if (e.key === 'd') {
                     this.game.debug = !this.game.debug;
                 } else if (e.key === 'r') {
-                    this.game.score = 0;
                     this.game.lives = 100;
                     this.game.ammo = 20;
                     this.game.enemies = [];
                     this.game.gameOver = false;
-                } else if (e.key === 's') {
-                    this.game.store === true;
+                } else if (e.key === 'ArrowRight') {
+                    this.game.speedup = true;
+                } else if (e.key === 'ArrowLeft') {
+                    this.game.speeddown = true;
                 }
             });
             window.addEventListener('keyup', e => {
                 if (this.game.keys.indexOf(e.key) > -1) {
                     this.game.keys.splice(this.game.keys.indexOf(e.key, 1), 1)
+                }
+                if (e.key === 'ArrowRight') {
+                    this.game.speedup = false;
+                }
+                if (e.key === 'ArrowLeft') {
+                    this.game.speeddown = false;
                 }
             });
         }
@@ -48,7 +53,7 @@ window.addEventListener('load', function () {
         }
         update() {
             this.x += this.speed;
-            if (this.x > this.game.width) this.markedForDeletion = true;
+            if (this.x > this.game.width + 500) this.markedForDeletion = true;
         }
         draw(context) {
             context.drawImage(this.image, this.x, this.y)
@@ -67,12 +72,9 @@ window.addEventListener('load', function () {
             this.frameY = 0;
             this.maxFrame = 37;
             this.speedy = 0;
-            this.maxSpeed = 10;
+            this.maxSpeed = 5;
             this.projectiles = [];
             this.image = document.getElementById('player');
-            this.powerUp = false;
-            this.powerUpTimer = 0;
-            this.powerUpLimit = 10000;
         }
         update(deltaTime) {
             if (this.game.keys.includes('ArrowUp') && this.game.lives > 0) this.speedy = -this.maxSpeed;
@@ -80,27 +82,21 @@ window.addEventListener('load', function () {
             else this.speedy = 0;
             if (this.game.lives <= 0) this.y += 10;
             this.y += this.speedy;
-            if (this.y + this.height * 0.5 > this.game.height) this.y -= this.maxSpeed;
-            if (this.y + this.height * 0.5 < this.game.height - this.game.height && this.game.lives >= 0) this.y += this.maxSpeed;
+            if (this.y + this.height > this.game.height) this.y -= this.maxSpeed;
+            if (this.y < this.game.height - this.game.height && this.game.lives >= 0) this.y += this.maxSpeed + 0.1;
+
             this.projectiles.forEach(projectile => {
                 projectile.update();
             });
             this.projectiles = this.projectiles.filter(projectile => !projectile.markedForDeletion);
+
             if (this.frameX < this.maxFrame && this.game.lives > 0) {
                 this.frameX++;
+                if (this.game.speedup === true) {
+                    this.frameX++;
+                }
             } else {
                 this.frameX = 0;
-            }
-            if (this.powerUp) {
-                if (this.powerUpTimer > this.powerUpLimit) {
-                    this.powerUpTimer = 0;
-                    this.powerUp = false;
-                    this.frameY = 0;
-                } else {
-                    this.powerUpTimer += deltaTime;
-                    this.frameY = 1;
-                    this.game.ammo += 0.1;
-                }
             }
         }
         draw(context) {
@@ -133,11 +129,11 @@ window.addEventListener('load', function () {
     class Enemy {
         constructor(game) {
             this.game = game;
-            this.x = this.game.width;
+            this.x = this.game.width + 500;
             this.speedX = Math.random() * -1.5 - 0.5;
+            this.firstspeed = this.speedX;
             this.markedForDeletion = false;
             this.lives = 5;
-            this.score = this.lives;
             this.frameX = 0;
             this.frameY = 0;
             this.maxFrame = 37;
@@ -150,12 +146,23 @@ window.addEventListener('load', function () {
             } else {
                 this.frameX = 0;
             }
+            if (this.game.speedup === true) {
+                this.speedX -= 1;
+            } else if (this.game.speeddown === true) {
+                this.speedX += 1;
+            } else {
+                this.speedX = this.firstspeed;
+            }
         }
         draw(context) {
             if (this.game.debug) context.strokeRect(this.x, this.y, this.width, this.height);
+            let lifePixel = 20;
+            let yp = this.y - 30;
+            let lifeBarW = this.fullhealth * lifePixel;
+            let xp = this.x + (this.width - lifeBarW) / 2;
             context.drawImage(this.image, this.frameX * this.width, this.frameY * this.height, this.width, this.height, this.x, this.y, this.width, this.height);
-            context.font = '20px Helvetica';
-            if (this.game.debug) context.fillText(this.lives, this.x, this.y);
+            context.fillStyle = 'red';
+            context.fillRect(xp, yp, this.lives * lifePixel, 10);
         }
     }
     class Angler1 extends Enemy {
@@ -167,9 +174,8 @@ window.addEventListener('load', function () {
             this.image = document.getElementById('angler1');
             this.frameY = Math.floor(Math.random() * 3);
             this.lives = 2;
-            this.score = this.lives;
             this.type = 'nonlucky';
-
+            this.fullhealth = this.lives;
         }
     }
     class Angler2 extends Enemy {
@@ -181,8 +187,8 @@ window.addEventListener('load', function () {
             this.image = document.getElementById('angler2');
             this.frameY = Math.floor(Math.random() * 2);
             this.lives = 30;
-            this.score = this.lives;
             this.type = 'blaster';
+            this.fullhealth = this.lives;
         }
     }
 
@@ -195,9 +201,10 @@ window.addEventListener('load', function () {
             this.image = document.getElementById('hivewhale');
             this.frameY = 0;
             this.lives = 15;
-            this.score = 15;
             this.type = 'hive';
             this.speedX = Math.random() * -1.2 - 0.2;
+            this.fullhealth = this.lives;
+
         }
     }
     class Drone extends Enemy {
@@ -210,9 +217,10 @@ window.addEventListener('load', function () {
             this.image = document.getElementById('drone');
             this.frameY = Math.floor(Math.random() * 2);
             this.lives = 10;
-            this.score = this.lives;
             this.type = 'drone';
             this.speedX = Math.random() * -1.2 - 0.2;
+            this.fullhealth = this.lives;
+
         }
     }
     class Healing extends Enemy {
@@ -261,8 +269,16 @@ window.addEventListener('load', function () {
         }
         update() {
             if (!this.game.gameOver) {
-                if (this.x <= -this.width) this.x = 0;
-                else this.x -= this.game.speed * this.speedModifier - 0.5;
+                if (this.game.speedup === true) {
+                    if (this.x <= -this.width) this.x = 0;
+                    else this.x -= this.game.speed * this.speedModifier + 10;
+                } else if (this.game.speeddown) {
+                    if (this.x <= -this.width) this.x = 0;
+                    else this.x -= this.game.speed * this.speedModifier - 10;
+                } else {
+                    if (this.x <= -this.width) this.x = 0;
+                    else this.x -= this.game.speed * this.speedModifier;
+                }
             }
         }
         draw(context) {
@@ -314,7 +330,6 @@ window.addEventListener('load', function () {
             context.shadowOffsetY = 4;
             context.shadowColor = 'black';
             context.font = '20px ' + this.fontFamily;
-            context.fillText('Score: ' + this.game.score, 20, 40);
             for (let i = 0; i < this.game.ammo; i++) {
                 context.fillRect(20 + 5 * i, 50, 3, 20);
             }
@@ -324,13 +339,13 @@ window.addEventListener('load', function () {
             const formattedTime = (this.game.gameTime * 0.001).toFixed(1);
             context.fillText('Timer: ' + formattedTime, 20, 100);
             context.fillText('HP: ' + this.game.lives, 20, 125);
-            context.fillText('Enemys destroyed: ' + this.game.downEnemy, 20, 150);
+            context.fillText('Enemys destroyed: ' + this.game.downEnemy, 20, 40);
 
             if (this.game.gameOver) {
                 context.textAlign = 'center';
                 let message1;
                 let message2;
-                if (this.game.score >= this.game.winningScore) {
+                if (this.game.lives > 0) {
                     message1 = "you win!";
                     message2 = "congraulations!";
                     let base = document.getElementById('base');
@@ -368,13 +383,15 @@ window.addEventListener('load', function () {
             this.score = 0;
             this.winningScore = 500;
             this.gameTime = 0;
-            this.timeLimit = 60000 * 30;
+            this.timeLimit = 60000 * 3;
             this.speed = 1;
             this.debug = false;
             this.lives = 100;
             this.store = false;
             this.damage = 1;
             this.downEnemy = 0;
+            this.speedup = false;
+            this.speeddown = false;
         }
         update(deltaTime) {
             if (!security.isGranted) return;
@@ -388,14 +405,14 @@ window.addEventListener('load', function () {
             }
             this.enemies.forEach(enemy => {
                 enemy.update();
-                if (enemy.type === 'blaster' && enemy.y < this.player.y) enemy.y += 3;
-                if (enemy.type === 'blaster' && enemy.y > this.player.y) enemy.y -= 3;
-                if (enemy.type === 'drone' && enemy.y < this.player.y) enemy.y += 5;
-                if (enemy.type === 'drone' && enemy.y > this.player.y) enemy.y -= 5;
-                if (enemy.type === 'hive' && enemy.y < this.player.y) enemy.y += 1;
-                if (enemy.type === 'hive' && enemy.y > this.player.y) enemy.y -= 1;
-                if (enemy.type === 'nonlucky' && enemy.y < this.player.y) enemy.y += 2;
-                if (enemy.type === 'nonlucky' && enemy.y > this.player.y) enemy.y -= 2;
+                if (enemy.type === 'blaster' && enemy.y < this.player.y && enemy.x < this.width && this.lives > 0) enemy.y += 3;
+                if (enemy.type === 'blaster' && enemy.y > this.player.y && enemy.x < this.width && this.lives > 0) enemy.y -= 3;
+                if (enemy.type === 'drone' && enemy.y < this.player.y && enemy.x < this.width && this.lives > 0) enemy.y += 5;
+                if (enemy.type === 'drone' && enemy.y > this.player.y && enemy.x < this.width && this.lives > 0) enemy.y -= 5;
+                if (enemy.type === 'hive' && enemy.y < this.player.y && enemy.x < this.width && this.lives > 0) enemy.y += 1;
+                if (enemy.type === 'hive' && enemy.y > this.player.y && enemy.x < this.width && this.lives > 0) enemy.y -= 1;
+                if (enemy.type === 'nonlucky' && enemy.y < this.player.y && enemy.x < this.width && this.lives > 0) enemy.y += 2;
+                if (enemy.type === 'nonlucky' && enemy.y > this.player.y && enemy.x < this.width && this.lives > 0) enemy.y -= 2;
                 if (this.checkCollision(this.player, enemy)) {
                     enemy.markedForDeletion = true;
                     if (enemy.type === 'lucky' && this.lives > 0) this.player.enterPowerUp();
@@ -419,8 +436,6 @@ window.addEventListener('load', function () {
                                 this.enemies.push(new Drone(this, enemy.x, Math.random() * this.height));
                                 this.enemies.push(new Drone(this, enemy.x, Math.random() * this.height));
                             }
-                            if (!this.gameOver) this.score += enemy.score;
-                            if (this.score >= this.winningScore) this.gameOver = true;
                         }
                     }
                 })
