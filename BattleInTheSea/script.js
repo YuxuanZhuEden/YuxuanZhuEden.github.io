@@ -391,7 +391,15 @@ window.addEventListener('load', function () {
             this.uplimit = 30000;
             this.speed = 1;
             this.debug = false;
+            this.maxlives = 100;
             this.lives = 100;
+            if (hardnessLevel === 'easy') {
+                this.lives = this.lives + 100;
+                this.maxlives = this.maxlives + 100;
+            } else if (hardnessLevel === 'hard') {
+                this.lives -= 50;
+                this.maxlives -= 50;
+            }
             this.store = false;
             this.damage = 3;
             this.downEnemy = 0;
@@ -399,7 +407,6 @@ window.addEventListener('load', function () {
             this.speeddown = false;
             this.shoottime = 0;
             this.uptime = 0;
-            this.maxlives = 100;
         }
         update(deltaTime, context) {
             if (!security.isGranted) return;
@@ -501,9 +508,31 @@ window.addEventListener('load', function () {
     function mySignIn() {
         var password = document.getElementById("pass").value;
         var isGranted = security.check(password);
+        const radioButtons = document.querySelectorAll('input[name="hardness_level"]');
+
+        for (const radioButton of radioButtons) {
+            if (radioButton.checked) {
+                hardnessLevel = radioButton.value;
+                break;
+            }
+        }
+
         if (isGranted) {
             canvas.style.visibility = "visible";
             securityDiv.style.visibility = "hidden";
+
+            const game = new Game(canvas.width, canvas.height);
+
+            let lastTime = 0;
+            function animate(timeStamp) {
+                const deltaTime = timeStamp - lastTime;
+                lastTime = timeStamp;
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                game.update(deltaTime, ctx);
+                game.draw(ctx);
+                requestAnimationFrame(animate);
+            }
+            animate(0);
         } else {
             canvas.style.visibility = "hidden";
             securityDiv.style.visibility = "visible";
@@ -511,21 +540,9 @@ window.addEventListener('load', function () {
     }
 
 
-    const game = new Game(canvas.width, canvas.height);
     const security = new Security();
     const securityDiv = document.getElementById("security");
     const submit = document.getElementById("submit");
+    let hardnessLevel = "normal";
     submit.onclick = function () { mySignIn() };
-
-
-    let lastTime = 0;
-    function animate(timeStamp) {
-        const deltaTime = timeStamp - lastTime;
-        lastTime = timeStamp;
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        game.update(deltaTime, ctx);
-        game.draw(ctx);
-        requestAnimationFrame(animate);
-    }
-    animate(0);
 });

@@ -5,6 +5,10 @@
 }
 #security {
     visibility: visible;
+    margin: 25px;
+    width: 450px;
+    height: 400px;
+    justify-content: center;
 }
 
 #canvas1 {

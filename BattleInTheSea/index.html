@@ -10,13 +10,21 @@
     <link rel="stylesheet" href="style.css"></link>
   </head>
   <body>
-    <div id="security">
+    <div id="security" >
       <div>
         <label for="pass">Password:</label>
         <input type="text" id="pass" name="password"
           minlength="5" maxlength="5" required></input>
       </div>
       <div>
+        <input type="radio" id="hard" name="hardness_level" value="hard" />
+        <label for="hard">hard</label>
+        <br />
+        <input type="radio" id="normal" name="hardness_level" value="normal" checked />
+        <label for="normal">normal</label>
+        <br />
+        <input type="radio" id="easy" name="hardness_level" value="easy" />
+        <label for="easy">easy</label>
       </div>
       <button id="submit">Sign in</button>
     </div>
