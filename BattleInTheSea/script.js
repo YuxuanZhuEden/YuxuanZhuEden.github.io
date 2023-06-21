@@ -395,7 +395,7 @@ window.addEventListener('load', function () {
             this.lives = 100;
             if (hardnessLevel === 'easy') {
                 this.lives = this.lives + 100;
-                this.maxlives = this.maxlives + 100;
+                this.maxlives = this.maxslives + 100;
             } else if (hardnessLevel === 'hard') {
                 this.lives -= 50;
                 this.maxlives -= 50;
