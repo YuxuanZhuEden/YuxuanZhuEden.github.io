@@ -446,7 +446,7 @@ window.addEventListener('load', function () {
             this.enemyTimer = 0;
             this.enemyInterval = 3000;
             this.ammo = 50;
-            this.backupammo = 10;
+            this.backupammo = 5;
             this.gameOver = false;
             this.score = 0;
             this.winningScore = 500;
@@ -464,7 +464,7 @@ window.addEventListener('load', function () {
                 this.lives -= 50;
                 this.maxlives -= 50;
             }
-            this.damage = 1;
+            this.damage = 3;
             this.downEnemy = 0;
             this.speedup = false;
             this.speeddown = false;
