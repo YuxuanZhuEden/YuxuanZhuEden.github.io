@@ -501,11 +501,11 @@ window.addEventListener('load', function () {
             else this.uptime = 0;
             if (this.uptime >= this.uplimit) {
                 let help = Math.random();
-                if (help < 0.3 && this.lives + 50 < 100) {
+                if (help < 0.3 && this.lives + 50 < 100 && this.gameOver === false) {
                     this.lives += 50;
-                } else if (help < 7) {
+                } else if (help < 7 && this.gameOver === false) {
                     this.damage++;
-                } else if (help < 1) {
+                } else if (help < 1 && this.gameOver === false) {
                     this.backupammo++;
                 }
             }
