@@ -12,18 +12,20 @@ window.addEventListener('load', function () {
             window.addEventListener('keydown', e => {
                 if ((e.key === 'ArrowUp' || e.key === 'ArrowDown') && this.game.keys.indexOf(e.key) === -1) {
                     this.game.keys.push(e.key);
-                } if (e.key === 'd') {
+                } else if (e.key === ' ' && this.game.keys.indexOf(e.key) === -1) {
+                    this.game.keys.push(e.key);
+                } else if (e.key === 'd') {
                     this.game.debug = !this.game.debug;
-                } if (e.key === 'ArrowRight') {
+                } else if (e.key === 'ArrowRight') {
                     this.game.speedup = true;
                 } else if (e.key === 'ArrowLeft') {
                     this.game.speeddown = true;
-                } if (e.key === ' ' && this.game.keys.indexOf(e.key) === -1) {
-                    this.game.keys.push(e.key);
-                } if (e.key === 'p' && this.game.pause === false) {
+                } else if (e.key === 'p' && this.game.pause === false) {
                     this.game.pause = true;
                 } else if (e.key === 'p' && this.game.pause === true) {
                     this.game.pause = false;
+                } else if (e.key === 'r') {
+                    this.game.rocketlaunch = true;
                 }
             });
             window.addEventListener('keyup', e => {
@@ -32,9 +34,12 @@ window.addEventListener('load', function () {
                 }
                 if (e.key === 'ArrowRight') {
                     this.game.speedup = false;
-                }
-                if (e.key === 'ArrowLeft') {
+                } else if (e.key === 'ArrowLeft') {
                     this.game.speeddown = false;
+                } else if (e.key === 'r') {
+                    this.game.rocketlaunch = false;
+                } else if (e.key === 'h') {
+                    this.game.healing = true;
                 }
             });
         }
@@ -46,9 +51,9 @@ window.addEventListener('load', function () {
             this.y = y;
             this.width = 10;
             this.height = 3;
-            if (this.game.speedup === true) this.speed = 20;
-            else if (this.game.speeddown === true) this.speed = 40;
-            else this.speed = 30;
+            if (this.game.speedup === true) this.speed = 30;
+            else if (this.game.speeddown === true) this.speed = 50;
+            else this.speed = 40;
             this.markedForDeletion = false;
             this.image = document.getElementById('projectile');
         }
@@ -61,13 +66,34 @@ window.addEventListener('load', function () {
         }
 
     }
+    class rocketlauncher {
+        constructor(game, x, y) {
+            this.game = game;
+            this.x = x;
+            this.y = y;
+            this.width = 10;
+            this.height = 3;
+            if (this.game.speedup === true) this.speed = 60;
+            else if (this.game.speeddown === true) this.speed = 40;
+            else this.speed = 50;
+            this.markedForDeletion = false;
+            this.image = document.getElementById('rocket');
+        }
+        update() {
+            this.x += this.speed;
+            if (this.x > 10000000000000) this.markedForDeletion = true;
+        }
+        draw(context) {
+            context.drawImage(this.image, this.x, this.y)
+        }
 
+    }
     class Player {
         constructor(game) {
             this.game = game;
             this.width = 120;
             this.height = 190;
-            this.x = 20;
+            this.x = 300;
             this.y = 100;
             this.frameX = 0;
             this.frameY = 0;
@@ -75,18 +101,28 @@ window.addEventListener('load', function () {
             this.speedy = 0;
             this.maxSpeed = 5;
             this.projectiles = [];
+            this.bombs = [];
             this.image = document.getElementById('player');
         }
         update(deltaTime) {
             if (this.game.keys.includes('ArrowUp') && this.game.lives > 0) this.speedy = -this.maxSpeed;
             else if (this.game.keys.includes('ArrowDown') && this.game.lives > 0) this.speedy = this.maxSpeed;
             else this.speedy = 0;
-
+            let heal = Math.random() * 200;
+            const formattedheal = parseInt(heal);
             if (this.game.keys.includes(' ') && this.game.shoottime === 10) {
                 this.game.player.shootTop();
                 this.game.shoottime = 0;
             }
-
+            if (this.game.rocketlaunch === true && this.game.rocketime === 50) {
+                this.game.player.launchtherocket();
+                this.game.rocketime = 0;
+            }
+            if (this.game.healing === true && this.game.grabedhealing > 0 && this.game.lives + formattedheal < this.game.maxlives && this.game.gameOver === false) {
+                this.game.lives += formattedheal;
+                this.game.grabedhealing--;
+                this.game.healing = false;
+            }
             if (this.game.lives <= 0) this.y += 10;
             this.y += this.speedy;
             if (this.y + this.height > this.game.height) this.y -= this.maxSpeed;
@@ -96,6 +132,10 @@ window.addEventListener('load', function () {
             this.projectiles.forEach(projectile => {
                 projectile.update();
             });
+            this.bombs.forEach(bomb => {
+                bomb.update();
+            });
+            this.bombs = this.bombs.filter(projectile => !projectile.markedForDeletion);
             this.projectiles = this.projectiles.filter(projectile => !projectile.markedForDeletion);
 
             if (this.frameX < this.maxFrame && this.game.lives > 0) {
@@ -112,30 +152,29 @@ window.addEventListener('load', function () {
             this.projectiles.forEach(projectile => {
                 projectile.draw(context);
             });
+            this.bombs.forEach(bomb => {
+                bomb.draw(context);
+            });
             context.drawImage(this.image, this.frameX * this.width, this.frameY * this.height, this.width, this.height, this.x, this.y, this.width, this.height);
             context.fillStyle = '#880000';
-            context.fillRect(60, 110, 5 * this.game.maxlives, 20);
+            context.fillRect(50, 225, 1 * this.game.maxlives, 20);
             context.fillStyle = 'red';
-            context.fillRect(60, 110, 5 * this.game.lives, 20);
-            context.fillStyle = this.color;
+            context.fillRect(50, 225, 1 * this.game.lives, 20);
+
+
         }
         shootTop() {
             if (this.game.ammo > 0 && this.game.lives > 0) {
                 this.projectiles.push(new Projectile(this.game, this.x + 80, this.y + 30));
                 this.game.ammo--;
             }
-            if (this.powerUp) this.shootBottom();
+
         }
-        shootBottom() {
-            if (this.game.ammo > 0) {
-                this.projectiles.push(new Projectile(this.game, this.x + 80, this.y + 175));
-                this.game.ammo--;
+        launchtherocket() {
+            if (this.game.rocketammo > 0 && this.game.lives >= 0) {
+                this.bombs.push(new rocketlauncher(this.game, this.x + 80, this.y + 30));
+                this.game.rocketammo--;
             }
-        }
-        enterPowerUp() {
-            this.powerUpTimer = 0;
-            this.powerUp = true;
-            this.game.ammo = this.game.maxAmmo + this.game.ammo;
         }
     }
     class EnemyProjectile {
@@ -160,10 +199,11 @@ window.addEventListener('load', function () {
         }
 
     }
+
     class Enemy {
         constructor(game) {
             this.game = game;
-            this.x = this.game.width + 500;
+            this.x = this.game.width + 10000;
             this.speedX = Math.random() * -1.5 - 0.5;
             this.firstspeed = this.speedX;
             this.markedForDeletion = false;
@@ -218,7 +258,7 @@ window.addEventListener('load', function () {
             this.y = Math.random() * (this.game.height * 0.9 - this.height);
             this.image = document.getElementById('angler1');
             this.frameY = Math.floor(Math.random() * 3);
-            this.lives = 15;
+            this.lives = 70;
             this.type = 'nonlucky';
             this.fullhealth = this.lives;
         }
@@ -395,13 +435,21 @@ window.addEventListener('load', function () {
             context.shadowOffsetY = 4;
             context.shadowColor = 'black';
             context.font = '20px ' + this.fontFamily;
-            const backupAmmoW = 10;
-            const backupAmmoG = 3;
+            const backupAmmoW = 10;//width
+            const backupAmmoG = 3;// gap
+            const image = document.getElementById('allrocket');
             for (let i = 0; i < this.game.ammo; i++) {
                 context.fillRect(20 + 5 * i, 50, 3, 20);
             }
+            for (let i = 0; i < this.game.rocketammo; i++) {
+                context.drawImage(image, 20 + (backupAmmoW + 15) * i, 75);
+
+            }
             for (let i = this.game.backupammo; i > 0; i--) {
                 context.fillRect(1350 - (backupAmmoW + backupAmmoG) * i, 50, backupAmmoW, 20);
+            }
+            for (let i = this.game.grabedhealing; i > 0; i--) {
+                context.fillRect(1350 - (backupAmmoW + backupAmmoG) * i, 75, backupAmmoW, 20);
             }
 
 
@@ -409,11 +457,15 @@ window.addEventListener('load', function () {
             if (this.game.speeddown && this.game.gameOver === false) this.game.gameTime -= 100;
             const formattedTime = ((this.game.timeLimit - this.game.gameTime) * 0.001).toFixed(0);
             const formattedup = ((this.game.uplimit - this.game.uptime) * 0.001).toFixed(0);
-            context.fillText('Time Left Until You Get To Enemy Base: ' + formattedTime + 's', 20, 100);
-            context.fillText('HP: ', 20, 125);
             context.fillText('Enemys Destroyed: ' + this.game.downEnemy, 20, 40);
-            context.fillText('Time Left Until Next Upgrade: ' + (formattedup), 20, 150);
             context.fillText('Damage: ' + this.game.damage, 20, 170);
+            context.fillText('Time Left Until You Get To Enemy Base: ' + formattedTime + 's', 20, 190);
+            context.fillText('HP: ', 20, 240);
+            context.fillStyle = 'white';
+            context.fillRect(20, 200, 250, 20);
+            context.fillStyle = 'white';
+            context.fillText('Time Left Until Next Upgrade: ' + (formattedup), 20, 263);
+            context.fillStyle = this.color;
             if (this.game.gameOver) {
                 context.textAlign = 'center';
                 let message1;
@@ -436,6 +488,7 @@ window.addEventListener('load', function () {
                 context.fillText(message2, this.game.width / 2, this.game.height / 2, this.game.width - this.game.width / 9, this.game.height / 3);
             }
             context.restore();
+            context.fillRect(20, 200, this.game.rocketime * 5, 20);
         }
     }
     class Game {
@@ -451,7 +504,7 @@ window.addEventListener('load', function () {
             this.enemyTimer = 0;
             this.enemyInterval = 3000;
             this.ammo = 50;
-            this.backupammo = 5;
+            this.backupammo = 10;
             this.gameOver = false;
             this.score = 0;
             this.winningScore = 500;
@@ -460,23 +513,29 @@ window.addEventListener('load', function () {
             this.uplimit = 30000;
             this.speed = 1;
             this.debug = false;
-            this.maxlives = 100;
-            this.lives = 100;
             if (hardnessLevel === 'easy') {
-                this.lives = this.lives + 100;
-                this.maxlives = this.maxlives + 100;
+                this.lives = 500;
+                this.maxlives = 500;
             } else if (hardnessLevel === 'hard') {
-                this.lives -= 50;
-                this.maxlives -= 50;
+                this.lives = 200;
+                this.maxlives = 100;
+            } else {
+                this.lives = 300;
+                this.maxlives = 300;
             }
-            this.damage = 3;
+            this.damage = 5;
             this.downEnemy = 0;
             this.speedup = false;
             this.speeddown = false;
             this.shoottime = 0;
             this.uptime = 0;
-            this.pause = true;
+            this.pause = false;
             this.launch = 1;
+            this.rocketlaunch = false;
+            this.rocketime = 0;
+            this.rocketammo = 20;
+            this.grabedhealing = 30;
+            this.healing = false;
         }
         update(deltaTime, context) {
             if (!security.isGranted) return;
@@ -487,7 +546,10 @@ window.addEventListener('load', function () {
             if (this.launch > 0) {
                 this.launch--;
             } else {
-                this.launch = 50;
+                this.launch = 40;
+            }
+            if (this.rocketime < 50 && this.lives >= 0) {
+                this.rocketime++;
             }
 
             if (this.gameTime > this.timeLimit || this.lives <= 0) this.gameOver = true;
@@ -536,16 +598,16 @@ window.addEventListener('load', function () {
 
                 if (this.checkCollision(this.player, enemy)) {
                     enemy.markedForDeletion = true;
-                    let heal = Math.random() * 20 + 10;
-                    const formattedheal = parseInt(heal);
                     if (enemy.type === 'lucky' && this.lives > 0) this.player.enterPowerUp();
                     else if (enemy.type !== 'ammo' && enemy.type !== 'lucky' && enemy.type !== 'heal' && this.gameOver === false) this.lives -= enemy.lives;
                     else if (this.lives - enemy.lives < 0) this.lives = 0;
-                    if (enemy.type === 'heal' && this.lives + formattedheal <= this.maxlives && this.gameOver === false) {
-                        this.lives += formattedheal;
+                    if (enemy.type === 'heal' && this.gameOver === false) {
+                        this.grabedhealing++;
                     }
-                    else if (enemy.type === 'heal' && this.lives + heal > this.maxlives && this.gameOver === false) this.lives = this.maxlives;
-                    if (enemy.type === 'ammo' && this.gameOver === false) this.backupammo++;
+                    if (enemy.type === 'ammo' && this.gameOver === false) {
+                        this.backupammo += 5;
+                        this.rocketammo += 5;
+                    };
                 }
                 this.player.projectiles.forEach(projectile => {
                     if (this.checkCollision(projectile, enemy)) {
@@ -564,6 +626,27 @@ window.addEventListener('load', function () {
                         }
                     }
                 })
+                this.player.bombs.forEach(bomb => {
+                    if (this.checkCollision(bomb, enemy)) {
+                        if (enemy.type !== 'heal' && enemy.type !== 'ammo') enemy.lives -= 20 + this.damage;
+                        bomb.markedForDeletion = true;
+                        if (this.checkexpoltion(enemy, bomb)) {
+                            enemy.markedForDeletion = true;
+                        }
+                        if (enemy.lives <= 0) {
+                            enemy.markedForDeletion = true;
+                            this.downEnemy++;
+                            if (enemy.type === 'hive') {
+                                this.enemies.push(new Drone(this, enemy.x, Math.random() * this.height));
+                                this.enemies.push(new Drone(this, enemy.x, Math.random() * this.height));
+                                this.enemies.push(new Drone(this, enemy.x, Math.random() * this.height));
+                                this.enemies.push(new Drone(this, enemy.x, Math.random() * this.height));
+                                this.enemies.push(new Drone(this, enemy.x, Math.random() * this.height));
+                            }
+                        }
+                    }
+                })
+
 
             });
             this.enemies = this.enemies.filter(enemy => !enemy.markedForDeletion)
@@ -600,6 +683,9 @@ window.addEventListener('load', function () {
         checkHit(rect1, rect2) {
             return (rect1.y < rect2.y + rect2.height && rect1.y + rect1.height > rect2.y);
         }
+        checkexpoltion(rect1, rect2) {
+            return (rect1.x + rect1.width > rect2.x - 100 && rect1.y + rect1.height < rect2.y - 100 && rect1.x < rect2.x + rect2 + 100 && rect1.y < rect2.y + rect2.height + 100);
+        }
     }
     function mySignIn() {
         var password = document.getElementById("pass").value;
@@ -624,10 +710,11 @@ window.addEventListener('load', function () {
                 const deltaTime = timeStamp - lastTime;
                 lastTime = timeStamp;
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
-                if (game.pause === true) {
+                if (game.pause === false) {
                     game.update(deltaTime, ctx);
-                    game.draw(ctx);
                 }
+                game.draw(ctx);
+
                 requestAnimationFrame(animate);
             }
             animate(0);

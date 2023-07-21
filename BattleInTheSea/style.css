@@ -24,6 +24,6 @@
     visibility: hidden;
 }
 
-#layer1,#layer2,#layer3,#layer4,#player,#angler1,#angler2,#lucky,#projectile,#hivewhale,#drone,#healthpackage,#ammo,#boss,#base,#Boom {
+#layer1,#layer2,#layer3,#layer4,#player,#angler1,#angler2,#lucky,#projectile,#hivewhale,#drone,#healthpackage,#ammo,#boss,#base,#Boom,#rocket,#allrocket {
     display: none;
 }
