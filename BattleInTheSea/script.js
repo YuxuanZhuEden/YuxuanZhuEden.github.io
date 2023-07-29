@@ -44,6 +44,7 @@ window.addEventListener('load', function () {
             });
         }
     }
+
     class Projectile {
         constructor(game, x, y) {
             this.game = game;
@@ -93,7 +94,7 @@ window.addEventListener('load', function () {
             this.game = game;
             this.width = 120;
             this.height = 190;
-            this.x = 300;
+            this.x = 550;
             this.y = 100;
             this.frameX = 0;
             this.frameY = 0;
@@ -110,13 +111,14 @@ window.addEventListener('load', function () {
             else this.speedy = 0;
             let heal = Math.random() * 200;
             const formattedheal = parseInt(heal);
-            if (this.game.keys.includes(' ') && this.game.shoottime === 10) {
+            if (this.game.keys.includes(' ') && this.game.shoottime === 5) {
                 this.game.player.shootTop();
                 this.game.shoottime = 0;
             }
             if (this.game.rocketlaunch === true && this.game.rocketime === 50) {
-                this.game.player.launchtherocket();
+                this.launchtherocket();
                 this.game.rocketime = 0;
+
             }
             if (this.game.healing === true && this.game.grabedhealing > 0 && this.game.lives + formattedheal < this.game.maxlives && this.game.gameOver === false) {
                 this.game.lives += formattedheal;
@@ -439,17 +441,17 @@ window.addEventListener('load', function () {
             const backupAmmoG = 3;// gap
             const image = document.getElementById('allrocket');
             for (let i = 0; i < this.game.ammo; i++) {
-                context.fillRect(20 + 5 * i, 50, 3, 20);
+                context.drawImage(document.getElementById('loadedammo'), 20 + 10 * i, 50, 10, 28);
             }
             for (let i = 0; i < this.game.rocketammo; i++) {
                 context.drawImage(image, 20 + (backupAmmoW + 15) * i, 75);
 
             }
             for (let i = this.game.backupammo; i > 0; i--) {
-                context.fillRect(1350 - (backupAmmoW + backupAmmoG) * i, 50, backupAmmoW, 20);
+                context.drawImage(document.getElementById('ammo'), 1350 - (backupAmmoW + 20) * i, 50, 40, 40);
             }
             for (let i = this.game.grabedhealing; i > 0; i--) {
-                context.fillRect(1350 - (backupAmmoW + backupAmmoG) * i, 75, backupAmmoW, 20);
+                context.drawImage(document.getElementById('grabedhealing'), 1350 - (20 + backupAmmoG) * i, 100, 20, 20);
             }
 
 
@@ -466,6 +468,8 @@ window.addEventListener('load', function () {
             context.fillStyle = 'white';
             context.fillText('Time Left Until Next Upgrade: ' + (formattedup), 20, 263);
             context.fillStyle = this.color;
+            context.fillText(this.game.lives, 800, 263);
+
             if (this.game.gameOver) {
                 context.textAlign = 'center';
                 let message1;
@@ -474,7 +478,7 @@ window.addEventListener('load', function () {
                     message1 = "you win!";
                     message2 = "congraulations!";
                     let base = document.getElementById('base');
-                    context.drawImage(base, 400, 200, 539, 198);
+                    context.drawImage(base, 1200, 200, 539, 198);
                 } else if (this.game.lives <= 0) {
                     message1 = "Get my repair kit and try again!";
                     message2 = "Blazes!";
@@ -518,7 +522,7 @@ window.addEventListener('load', function () {
                 this.maxlives = 500;
             } else if (hardnessLevel === 'hard') {
                 this.lives = 200;
-                this.maxlives = 100;
+                this.maxlives = 200;
             } else {
                 this.lives = 300;
                 this.maxlives = 300;
@@ -540,7 +544,7 @@ window.addEventListener('load', function () {
         update(deltaTime, context) {
             if (!security.isGranted) return;
             if (!this.gameOver) this.gameTime += deltaTime;
-            if (this.shoottime < 10) {
+            if (this.shoottime < 5) {
                 this.shoottime++;
             }
             if (this.launch > 0) {
@@ -601,13 +605,13 @@ window.addEventListener('load', function () {
                     if (enemy.type === 'lucky' && this.lives > 0) this.player.enterPowerUp();
                     else if (enemy.type !== 'ammo' && enemy.type !== 'lucky' && enemy.type !== 'heal' && this.gameOver === false) this.lives -= enemy.lives;
                     else if (this.lives - enemy.lives < 0) this.lives = 0;
-                    if (enemy.type === 'heal' && this.gameOver === false) {
-                        this.grabedhealing++;
-                    }
-                    if (enemy.type === 'ammo' && this.gameOver === false) {
-                        this.backupammo += 5;
-                        this.rocketammo += 5;
-                    };
+                    if (enemy.type === 'heal' && this.gameOver === false && this.grabedhealing + 5 <= 30) {
+                        this.grabedhealing += 5;
+                    } else if (enemy.type === 'heal' && this.gameOver === false && this.grabedhealing + 5 > 30)
+                        if (enemy.type === 'ammo' && this.gameOver === false) {
+                            this.backupammo += 2;
+                            this.rocketammo += 3;
+                        };
                 }
                 this.player.projectiles.forEach(projectile => {
                     if (this.checkCollision(projectile, enemy)) {
@@ -630,7 +634,7 @@ window.addEventListener('load', function () {
                     if (this.checkCollision(bomb, enemy)) {
                         if (enemy.type !== 'heal' && enemy.type !== 'ammo') enemy.lives -= 20 + this.damage;
                         bomb.markedForDeletion = true;
-                        if (this.checkexpoltion(enemy, bomb)) {
+                        if (this.checkexpoltion(bomb, enemy) || this.checkexpoltion(enemy, bomb)) {
                             enemy.markedForDeletion = true;
                         }
                         if (enemy.lives <= 0) {
@@ -664,7 +668,9 @@ window.addEventListener('load', function () {
                 enemy.draw(context);
             });
             this.ui.draw(context);
-
+            if (this.lives <= 70) {
+                context.drawImage(document.getElementById('redbackground'), 0, 0, 1400, 500);
+            }
         }
         addEnemy() {
             const randomize = Math.random();
@@ -684,7 +690,10 @@ window.addEventListener('load', function () {
             return (rect1.y < rect2.y + rect2.height && rect1.y + rect1.height > rect2.y);
         }
         checkexpoltion(rect1, rect2) {
-            return (rect1.x + rect1.width > rect2.x - 100 && rect1.y + rect1.height < rect2.y - 100 && rect1.x < rect2.x + rect2 + 100 && rect1.y < rect2.y + rect2.height + 100);
+            return (rect1.x + rect1.width + 100 > rect2.x &&
+                rect1.x + 1000 < rect2.x + rect2.width &&
+                rect1.y + rect1.height + 1000 > rect2.y &&
+                rect1.y + 1000 < rect2.y + rect2.height);
         }
     }
     function mySignIn() {
