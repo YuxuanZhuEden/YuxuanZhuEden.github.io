@@ -14,8 +14,6 @@ window.addEventListener('load', function () {
                     this.game.keys.push(e.key);
                 } else if (e.key === ' ' && this.game.keys.indexOf(e.key) === -1) {
                     this.game.keys.push(e.key);
-                } else if (e.key === 'd') {
-                    this.game.debug = !this.game.debug;
                 } else if (e.key === 'ArrowRight') {
                     this.game.speedup = true;
                 } else if (e.key === 'ArrowLeft') {
@@ -26,6 +24,8 @@ window.addEventListener('load', function () {
                     this.game.pause = false;
                 } else if (e.key === 'r') {
                     this.game.rocketlaunch = true;
+                } else if (e.key === 'h') {
+                    this.game.healing = true;
                 }
             });
             window.addEventListener('keyup', e => {
@@ -38,8 +38,6 @@ window.addEventListener('load', function () {
                     this.game.speeddown = false;
                 } else if (e.key === 'r') {
                     this.game.rocketlaunch = false;
-                } else if (e.key === 'h') {
-                    this.game.healing = true;
                 } else if (e.key === 'b' && this.game.blocking === false) {
                     this.game.forsefield--;
                     this.game.blocking = true;
@@ -50,6 +48,8 @@ window.addEventListener('load', function () {
                     this.game.store = false;
                 } else if (e.key === 'f') {
                     this.game.repairing = true;
+                } else if (e.key === 'h') {
+                    this.game.healing = false;
                 }
             });
         }
@@ -239,6 +239,7 @@ window.addEventListener('load', function () {
             this.frameX = 0;
             this.frameY = 0;
             this.maxFrame = 37;
+            this.type;
         }
         update() {
             this.x += (this.speedX - this.game.speed);
@@ -268,10 +269,12 @@ window.addEventListener('load', function () {
             let xp = this.x + (this.width - lifeBarW) / 2;
             context.drawImage(this.image, this.frameX * this.width, this.frameY * this.height,
                 this.width, this.height, this.x, this.y, this.width, this.height);
-            context.fillStyle = '#880000';
-            context.fillRect(xp, yp, lifeBarW, 10);
-            context.fillStyle = '#ff0000';
-            context.fillRect(xp, yp, this.lives * lifePixel, 10);
+            if (this.type !== 'drone') {
+                context.fillStyle = '#880000';
+                context.fillRect(xp, yp, lifeBarW, 10);
+                context.fillStyle = '#ff0000';
+                context.fillRect(xp, yp, this.lives * lifePixel, 10);
+            }
             if (this instanceof Angler2) {
                 this.enemyprojectiles.forEach(projectile => {
                     projectile.draw(context);
@@ -351,8 +354,6 @@ window.addEventListener('load', function () {
             this.lives = 10;
             this.type = 'drone';
             this.speedX = Math.random() * -1.2 - 0.2;
-            this.fullhealth = this.lives;
-
         }
     }
     class Healing extends Enemy {
@@ -507,28 +508,18 @@ window.addEventListener('load', function () {
             context.font = '20px ' + this.fontFamily;
             const backupAmmoW = 10;//width
             const backupAmmoG = 3;// gap
-            const image = document.getElementById('allrocket');
-            for (let i = 0; i < this.game.ammo; i++) {
-                context.drawImage(document.getElementById('loadedammo'), 20 + 10 * i, 50, 10, 28);
-            }
-            for (let i = 0; i < this.game.rocketammo; i++) {
-                context.drawImage(image, 20 + (backupAmmoW + 15) * i, 75);
-
-            }
-            for (let i = this.game.backupammo; i > 0; i--) {
-                context.drawImage(document.getElementById('ammo'), 1350 - (backupAmmoW + 20) * i, 50, 40, 40);
-            }
-            for (let i = this.game.grabedhealing; i > 0; i--) {
-                context.drawImage(document.getElementById('grabedhealing'), 1350 - (20 + backupAmmoG) * i, 100, 20, 20);
-            }
-            for (let i = this.game.forsefield; i > 0; i--) {
-                context.drawImage(document.getElementById('sheild'), 1350 - (20 + backupAmmoG) * i, 130, 15, 30);
-            }
-            for (let i = this.game.repairkits; i > 0; i--) {
-                context.drawImage(document.getElementById('fix'), 1350 - (30 + backupAmmoG) * i, 170, 30, 30);
-            }
-
-
+            context.drawImage(document.getElementById('loadedammo'), 23, 45, 10, 28);
+            context.fillText("x" + this.game.ammo, 40, 70);
+            context.drawImage(document.getElementById('allrocket'), 5 + backupAmmoW, 75);
+            context.fillText("x" + this.game.rocketammo, 40, 150);
+            context.drawImage(document.getElementById('ammo'), 1350 - (backupAmmoW + 20) - 40, 50, 40, 40);
+            context.fillText("x" + this.game.backupammo, 1320, 85);
+            context.drawImage(document.getElementById('grabedhealing'), 1350 - (20 + backupAmmoG) - 40, 100, 20, 20);
+            context.fillText("x" + this.game.grabedhealing, 1320, 120);
+            context.drawImage(document.getElementById('sheild'), 1350 - (20 + backupAmmoG) - 40, 130, 15, 30);
+            context.fillText("x" + this.game.forsefield, 1320, 160);
+            context.drawImage(document.getElementById('fix'), 1350 - (30 + backupAmmoG) - 40, 170, 30, 30);
+            context.fillText("x" + this.game.repairkits, 1320, 200);
             if (this.game.speedup && this.game.gameOver === false) this.game.gameTime += 100;
             if (this.game.speeddown && this.game.gameOver === false) this.game.gameTime -= 100;
             const formattedTime = ((this.game.timeLimit - this.game.gameTime) * 0.001).toFixed(0);
