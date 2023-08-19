@@ -26,6 +26,8 @@ window.addEventListener('load', function () {
                     this.game.rocketlaunch = true;
                 } else if (e.key === 'h') {
                     this.game.healing = true;
+                } else if (e.key === 'f') {
+                    this.game.repairing = true;
                 }
             });
             window.addEventListener('keyup', e => {
@@ -47,7 +49,7 @@ window.addEventListener('load', function () {
                 } else if (e.key === 'e' && this.game.store === true) {
                     this.game.store = false;
                 } else if (e.key === 'f') {
-                    this.game.repairing = true;
+                    this.game.repairing = false;
                 } else if (e.key === 'h') {
                     this.game.healing = false;
                 }
@@ -77,22 +79,30 @@ window.addEventListener('load', function () {
         }
 
     }
-    class rocketlauncher {
+    const enemyTypes = ['unlucky', 'blaster', 'hivewhale', 'drone'];
+    class Rocketlauncher {
         constructor(game, x, y) {
             this.game = game;
             this.x = x;
             this.y = y;
             this.width = 10;
             this.height = 3;
-            if (this.game.speedup === true) this.speed = 60;
-            else if (this.game.speeddown === true) this.speed = 40;
-            else this.speed = 50;
+            if (this.game.speedup === true) this.speedX = 60;
+            else if (this.game.speeddown === true) this.speedX = 40;
+            else this.speedX = 50;
             this.markedForDeletion = false;
             this.image = document.getElementById('rocket');
+            this.speedY = 0;
+            this.targetEnemy = this.game.enemies?.find((enemy) => enemyTypes.includes(enemy.type));
         }
         update() {
-            this.x += this.speed;
-            if (this.x > 10000000000000) this.markedForDeletion = true;
+            this.x += this.speedX;
+            if (this.x > 1700) this.markedForDeletion = true;
+
+            if (this.targetEnemy) {
+                this.speedY = this.speedX * (this.targetEnemy.y - this.y) / (this.targetEnemy.x - this.x);
+                this.y += this.speedY;
+            }
         }
         draw(context) {
             context.drawImage(this.image, this.x, this.y)
@@ -199,7 +209,7 @@ window.addEventListener('load', function () {
         }
         launchtherocket() {
             if (this.game.rocketammo > 0 && this.game.lives >= 0) {
-                this.bombs.push(new rocketlauncher(this.game, this.x + 80, this.y + 30));
+                this.bombs.push(new Rocketlauncher(this.game, this.x + 80, this.y + 30));
                 this.game.rocketammo--;
             }
         }
@@ -231,7 +241,7 @@ window.addEventListener('load', function () {
     class Enemy {
         constructor(game) {
             this.game = game;
-            this.x = this.game.width + 10000;
+            this.x = this.game.width + 300;
             this.speedX = Math.random() * -1.5 - 0.5;
             this.firstspeed = this.speedX;
             this.markedForDeletion = false;
@@ -593,7 +603,7 @@ window.addEventListener('load', function () {
                 this.lives = 300;
                 this.maxlives = 300;
             }
-            this.damage = 5;
+            this.damage = 3;
             this.downEnemy = 0;
             this.speedup = false;
             this.speeddown = false;
@@ -616,11 +626,11 @@ window.addEventListener('load', function () {
             this.repairing = false;
         }
         update(deltaTime, context) {
+
             if (!security.isGranted) return;
             if (!this.gameOver) this.gameTime += deltaTime;
             if (this.stopdamage < this.staydamagestop) this.lives -= this.staydamage * 0.1;
             this.stopdamage++;
-            console.log(this.stopdamage)
             if (this.shoottime < 5) {
                 this.shoottime++;
             }
@@ -661,22 +671,22 @@ window.addEventListener('load', function () {
                 if (enemy.type === 'hive' && this.launch <= 0) {
                     this.enemies.push(new Drone(this, enemy.x, Math.random() * this.height));
                 }
-                if (enemy.type === 'blaster' && enemy.y < this.player.y
-                    && enemy.x < this.width && this.lives > 0) enemy.y += 3;
-                if (enemy.type === 'blaster' && enemy.y > this.player.y
-                    && enemy.x < this.width && this.lives > 0) enemy.y -= 3;
-                if (enemy.type === 'drone' && enemy.y < this.player.y
-                    && enemy.x < this.width && this.lives > 0) enemy.y += 5;
-                if (enemy.type === 'drone' && enemy.y > this.player.y
-                    && enemy.x < this.width && this.lives > 0) enemy.y -= 5;
-                if (enemy.type === 'hive' && enemy.y < this.player.y
-                    && enemy.x < this.width && this.lives > 0) enemy.y += 1;
-                if (enemy.type === 'hive' && enemy.y > this.player.y
-                    && enemy.x < this.width && this.lives > 0) enemy.y -= 1;
-                if (enemy.type === 'nonlucky' && enemy.y < this.player.y
-                    && enemy.x < this.width && this.lives > 0) enemy.y += 2;
-                if (enemy.type === 'nonlucky' && enemy.y > this.player.y
-                    && enemy.x < this.width && this.lives > 0) enemy.y -= 2;
+                // if (enemy.type === 'blaster' && enemy.y < this.player.y
+                //     && enemy.x < this.width && this.lives > 0) enemy.y += 3;
+                // if (enemy.type === 'blaster' && enemy.y > this.player.y
+                //     && enemy.x < this.width && this.lives > 0) enemy.y -= 3;
+                // if (enemy.type === 'drone' && enemy.y < this.player.y
+                //     && enemy.x < this.width && this.lives > 0) enemy.y += 5;
+                // if (enemy.type === 'drone' && enemy.y > this.player.y
+                //     && enemy.x < this.width && this.lives > 0) enemy.y -= 5;
+                // if (enemy.type === 'hive' && enemy.y < this.player.y
+                //     && enemy.x < this.width && this.lives > 0) enemy.y += 1;
+                // if (enemy.type === 'hive' && enemy.y > this.player.y
+                //     && enemy.x < this.width && this.lives > 0) enemy.y -= 1;
+                // if (enemy.type === 'nonlucky' && enemy.y < this.player.y
+                //     && enemy.x < this.width && this.lives > 0) enemy.y += 2;
+                // if (enemy.type === 'nonlucky' && enemy.y > this.player.y
+                //     && enemy.x < this.width && this.lives > 0) enemy.y -= 2;
 
                 if (enemy instanceof Angler2) {
                     enemy.shoot();
