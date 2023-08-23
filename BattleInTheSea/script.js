@@ -40,14 +40,10 @@ window.addEventListener('load', function () {
                     this.game.speeddown = false;
                 } else if (e.key === 'r') {
                     this.game.rocketlaunch = false;
-                } else if (e.key === 'b' && this.game.blocking === false) {
+                } else if (e.key === 'b' && this.game.blocking === false && this.game.forsefield > 0) {
                     this.game.forsefield--;
                     this.game.blocking = true;
                     this.game.sheildhealth = 125;
-                } else if (e.key === 's') {
-                    this.game.store = true;
-                } else if (e.key === 'e' && this.game.store === true) {
-                    this.game.store = false;
                 } else if (e.key === 'f') {
                     this.game.repairing = false;
                 } else if (e.key === 'h') {
@@ -87,18 +83,18 @@ window.addEventListener('load', function () {
             this.y = y;
             this.width = 10;
             this.height = 3;
-            if (this.game.speedup === true) this.speedX = 60;
-            else if (this.game.speeddown === true) this.speedX = 40;
-            else this.speedX = 50;
+            if (this.game.speedup === true) this.speedX = 1;
+            else if (this.game.speeddown === true) this.speedX = 1;
+            else this.speedX = 1;
             this.markedForDeletion = false;
             this.image = document.getElementById('rocket');
             this.speedY = 0;
             this.targetEnemy = this.game.enemies?.find((enemy) => enemyTypes.includes(enemy.type));
         }
         update() {
+            this.speedX += 2;
             this.x += this.speedX;
             if (this.x > 1700) this.markedForDeletion = true;
-
             if (this.targetEnemy) {
                 this.speedY = this.speedX * (this.targetEnemy.y - this.y) / (this.targetEnemy.x - this.x);
                 this.y += this.speedY;
@@ -434,13 +430,7 @@ window.addEventListener('load', function () {
         }
 
     }
-    class store {
-        constructor(game) {
 
-        }
-        update() {
-        }
-    }
     class Layer {
         constructor(game, image, speedModifier) {
             this.game = game;
@@ -534,7 +524,7 @@ window.addEventListener('load', function () {
             if (this.game.speeddown && this.game.gameOver === false) this.game.gameTime -= 100;
             const formattedTime = ((this.game.timeLimit - this.game.gameTime) * 0.001).toFixed(0);
             const formattedup = ((this.game.uplimit - this.game.uptime) * 0.001).toFixed(0);
-            context.fillText("coins: " + this.game.downEnemy.toFixed(0), 20, 40);
+            context.fillText("coins: " + this.game.downEnemy, 20, 40);
             context.fillText('Damage: ' + this.game.damage, 20, 170);
             context.fillText('Time Left Until You Get To Enemy Base: ' + formattedTime + 's', 20, 190);
             context.fillText('HP: ', 20, 240);
@@ -582,9 +572,9 @@ window.addEventListener('load', function () {
             this.enemies = [];
             this.enemyTimer = 0;
             this.enemyInterval = 3000;
-            this.ammo = 50;
-            this.backupammo = 10;
-            this.forsefield = 5;
+            this.ammo = 20;
+            this.backupammo = 1;
+            this.forsefield = 1;
             this.gameOver = false;
             this.score = 0;
             this.winningScore = 500;
@@ -603,8 +593,8 @@ window.addEventListener('load', function () {
                 this.lives = 300;
                 this.maxlives = 300;
             }
-            this.damage = 3;
-            this.downEnemy = 0;
+            this.damage = 1;
+            this.downEnemy = 10;
             this.speedup = false;
             this.speeddown = false;
             this.shoottime = 0;
@@ -613,16 +603,15 @@ window.addEventListener('load', function () {
             this.launch = 1;
             this.rocketlaunch = false;
             this.rocketime = 0;
-            this.rocketammo = 20;
-            this.grabedhealing = 30;
+            this.rocketammo = 1;
+            this.grabedhealing = 1;
             this.healing = false;
             this.blocking = false;
             this.sheildhealth = 125;
-            this.shoping = false;
             this.staydamage = 0;
             this.staydamagestop = 100;
             this.stopdamage = 100;
-            this.repairkits = 3;
+            this.repairkits = 1;
             this.repairing = false;
         }
         update(deltaTime, context) {
@@ -671,22 +660,22 @@ window.addEventListener('load', function () {
                 if (enemy.type === 'hive' && this.launch <= 0) {
                     this.enemies.push(new Drone(this, enemy.x, Math.random() * this.height));
                 }
-                // if (enemy.type === 'blaster' && enemy.y < this.player.y
-                //     && enemy.x < this.width && this.lives > 0) enemy.y += 3;
-                // if (enemy.type === 'blaster' && enemy.y > this.player.y
-                //     && enemy.x < this.width && this.lives > 0) enemy.y -= 3;
-                // if (enemy.type === 'drone' && enemy.y < this.player.y
-                //     && enemy.x < this.width && this.lives > 0) enemy.y += 5;
-                // if (enemy.type === 'drone' && enemy.y > this.player.y
-                //     && enemy.x < this.width && this.lives > 0) enemy.y -= 5;
-                // if (enemy.type === 'hive' && enemy.y < this.player.y
-                //     && enemy.x < this.width && this.lives > 0) enemy.y += 1;
-                // if (enemy.type === 'hive' && enemy.y > this.player.y
-                //     && enemy.x < this.width && this.lives > 0) enemy.y -= 1;
-                // if (enemy.type === 'nonlucky' && enemy.y < this.player.y
-                //     && enemy.x < this.width && this.lives > 0) enemy.y += 2;
-                // if (enemy.type === 'nonlucky' && enemy.y > this.player.y
-                //     && enemy.x < this.width && this.lives > 0) enemy.y -= 2;
+                if (enemy.type === 'blaster' && enemy.y < this.player.y
+                    && enemy.x < this.width && this.lives > 0) enemy.y += 3;
+                if (enemy.type === 'blaster' && enemy.y > this.player.y
+                    && enemy.x < this.width && this.lives > 0) enemy.y -= 3;
+                if (enemy.type === 'drone' && enemy.y < this.player.y
+                    && enemy.x < this.width && this.lives > 0) enemy.y += 5;
+                if (enemy.type === 'drone' && enemy.y > this.player.y
+                    && enemy.x < this.width && this.lives > 0) enemy.y -= 5;
+                if (enemy.type === 'hive' && enemy.y < this.player.y
+                    && enemy.x < this.width && this.lives > 0) enemy.y += 1;
+                if (enemy.type === 'hive' && enemy.y > this.player.y
+                    && enemy.x < this.width && this.lives > 0) enemy.y -= 1;
+                if (enemy.type === 'nonlucky' && enemy.y < this.player.y
+                    && enemy.x < this.width && this.lives > 0) enemy.y += 2;
+                if (enemy.type === 'nonlucky' && enemy.y > this.player.y
+                    && enemy.x < this.width && this.lives > 0) enemy.y -= 2;
 
                 if (enemy instanceof Angler2) {
                     enemy.shoot();
@@ -745,7 +734,7 @@ window.addEventListener('load', function () {
                         projectile.markedForDeletion = true;
                         if (enemy.lives <= 0) {
                             enemy.markedForDeletion = true;
-                            let luckyness = Math.random() * 10;
+                            let luckyness = (Math.random() * 10).toFixed(0);
                             this.downEnemy += luckyness;
                             if (enemy.type === 'hive') {
                                 this.enemies.push(new Drone(this, enemy.x, Math.random() * this.height));
@@ -767,8 +756,8 @@ window.addEventListener('load', function () {
 
                         if (enemy.lives <= 0) {
                             enemy.markedForDeletion = true;
-                            let luckyness = Math.random() * 10;
-                            this.downEnemy += luckyness;
+                            let money = Math.random();
+
                         }
                     }
                 })
@@ -827,10 +816,9 @@ window.addEventListener('load', function () {
         }
 
         if (isGranted) {
-            canvas.style.visibility = "visible";
+            gameDiv.style.visibility = "visible";
             securityDiv.style.visibility = "hidden";
-
-            const game = new Game(canvas.width, canvas.height);
+            shopDiv.style.visibility = "hidden";
 
             let lastTime = 0;
             function animate(timeStamp) {
@@ -846,15 +834,76 @@ window.addEventListener('load', function () {
             }
             animate(0);
         } else {
-            canvas.style.visibility = "hidden";
+            gameDiv.style.visibility = "hidden";
             securityDiv.style.visibility = "visible";
+            shopDiv.style.visibility = "hidden";
         }
     }
+    function goshoping() {
+        gameDiv.style.visibility = "hidden";
+        shopDiv.style.visibility = "visible";
+        securityDiv.style.visibility = "hidden";
+        game.pause = true;
+        updateBalance();
+    }
+    shopButton.onclick = function () {
+        goshoping();
+    }
+    resumeGame.onclick = function () {
+        gameDiv.style.visibility = "visible";
+        securityDiv.style.visibility = "hidden";
+        shopDiv.style.visibility = "hidden";
+        game.pause = false;
 
+    }
 
+    btnBuyammo.onclick = function () {
+        if (game.downEnemy > 0) {
+            game.downEnemy -= 2000;
+            game.backupammo += 5;
+        }
+        updateBalance();
+    }
+    btnBuyultrasheild.onclick = function () {
+        if (game.downEnemy > 0) {
+            game.downEnemy -= 3000;
+            game.forsefield += 5;
+        }
+        updateBalance();
+    }
+    btnBuygrabedhealing.onclick = function () {
+        if (game.downEnemy > 0) {
+            game.downEnemy -= 10000;
+            game.grabedhealing += 5;
+        }
+        updateBalance();
+    }
+    btnBuymissile.onclick = function () {
+        if (game.downEnemy > 0) {
+            game.downEnemy -= 5000;
+            game.rocketammo += 5;
+        }
+        updateBalance();
+    }
+    btnBuyFix.onclick = function () {
+        if (game.downEnemy > 0) {
+            game.downEnemy -= 5;
+            game.repairkits += 5;
+        }
+        updateBalance();
+    }
+
+    function updateBalance() {
+        let balance = document.getElementById('howRich');
+        balance.innerText = 'balance: ' + game.downEnemy;
+    }
+
+    const game = new Game(canvas.width, canvas.height);
     const security = new Security();
     const securityDiv = document.getElementById("security");
+    const gameDiv = document.getElementById("gamePage");
+    const shopDiv = document.getElementById("shoppingPage");
     const submit = document.getElementById("submit");
-    let hardnessLevel = "normal";
+    var hardnessLevel = "normal";
     submit.onclick = function () { mySignIn() };
 });
