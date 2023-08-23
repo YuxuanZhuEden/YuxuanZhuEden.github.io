@@ -58,7 +58,7 @@
     margin: 12px;
 }
 
-.grid-container {
+#grid-container {
     display: grid;
     grid-template-columns: auto auto auto;
     grid-template-rows: auto auto auto;
@@ -71,7 +71,7 @@
     height: 85%;
 }
 
-.grid-item {
+#grid-item {
     background-color: rgba(255, 255, 255, 0.8);
     border: 1px solid rgba(0, 0, 0, 0.8);
     padding: 20px;
@@ -82,25 +82,25 @@
     flex-direction: column;
 }
 
-.grid-item-img1 {
+#grid-item-img1 {
     margin-top: 10px;
     width: 100;
     height: 100;
 }
 
-.grid-item-img2 {
+#grid-item-img2 {
     margin-top: 10px;
     width: 60;
     height: 100;
 }
 
-.grid-item-img3 {
+#grid-item-img3 {
     margin-top: 10px;
     width: 170;
     height: 100;
 }
 
-.grid-item-btn {
+#grid-item-btn {
     align-self: center;
     margin-top: 10px;
     width: 70;
@@ -138,6 +138,6 @@
 #grabedhealing,
 #loadedammo,
 #sheild,
-#fix {
+#fix #resumeGame #grid-item-btn #grid-item-img1 #grid-item-img2 #grid-item-img3 {
     display: none;
 }
