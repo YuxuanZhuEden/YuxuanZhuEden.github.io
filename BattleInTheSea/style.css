@@ -68,7 +68,7 @@
     top: 10%;
     left: 0;
     width: 100%;
-    height: 85%;
+    height: 90%;
 }
 
 .grid-item {
@@ -84,26 +84,26 @@
 
 .grid-item-img1 {
     margin-top: 10px;
-    width: 100;
-    height: 100;
+    width: 60;
+    height: 60;
 }
 
 .grid-item-img2 {
     margin-top: 10px;
-    width: 60;
-    height: 100;
+    width: 30;
+    height: 60;
 }
 
 .grid-item-img3 {
     margin-top: 10px;
-    width: 170;
-    height: 100;
+    width: 130;
+    height: 60;
 }
 
 #grid-item-btn {
     align-self: center;
     margin-top: 10px;
-    width: 70;
+    width: 60;
     height: 40;
 }
 
@@ -138,6 +138,6 @@
 #grabedhealing,
 #loadedammo,
 #sheild,
-#fix #resumeGame #grid-item-btn #grid-item-img1 #grid-item-img2 #grid-item-img3 {
+#fix {
     display: none;
 }

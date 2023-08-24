@@ -60,14 +60,12 @@ window.addEventListener('load', function () {
             this.y = y;
             this.width = 10;
             this.height = 3;
-            if (this.game.speedup === true) this.speed = 10;
-            else if (this.game.speeddown === true) this.speed = 30;
-            else this.speed = 20;
+
             this.markedForDeletion = false;
             this.image = document.getElementById('projectile');
         }
         update() {
-            this.x += this.speed;
+            this.x += this.game.projectspeed;
             if (this.x > this.game.width + 10000000000000) this.markedForDeletion = true;
         }
         draw(context) {
@@ -577,7 +575,6 @@ window.addEventListener('load', function () {
             this.forsefield = 1;
             this.gameOver = false;
             this.score = 0;
-            this.winningScore = 500;
             this.gameTime = 0;
             this.timeLimit = 60 * 1000 * 10; // 10 min
             this.uplimit = 30000;
@@ -594,7 +591,7 @@ window.addEventListener('load', function () {
                 this.maxlives = 300;
             }
             this.damage = 1;
-            this.downEnemy = 10;
+            this.downEnemy = 50000;
             this.speedup = false;
             this.speeddown = false;
             this.shoottime = 0;
@@ -613,6 +610,7 @@ window.addEventListener('load', function () {
             this.stopdamage = 100;
             this.repairkits = 1;
             this.repairing = false;
+            this.projectspeed = 5
         }
         update(deltaTime, context) {
 
@@ -734,8 +732,7 @@ window.addEventListener('load', function () {
                         projectile.markedForDeletion = true;
                         if (enemy.lives <= 0) {
                             enemy.markedForDeletion = true;
-                            let luckyness = (Math.random() * 10).toFixed(0);
-                            this.downEnemy += luckyness;
+                            this.downEnemy += 2000;
                             if (enemy.type === 'hive') {
                                 this.enemies.push(new Drone(this, enemy.x, Math.random() * this.height));
                                 this.enemies.push(new Drone(this, enemy.x, Math.random() * this.height));
@@ -887,8 +884,22 @@ window.addEventListener('load', function () {
     }
     btnBuyFix.onclick = function () {
         if (game.downEnemy > 0) {
-            game.downEnemy -= 5;
+            game.downEnemy -= 500;
             game.repairkits += 5;
+        }
+        updateBalance();
+    }
+    btnBuyspeed.onclick = function () {
+        if (game.downEnemy > 0) {
+            game.downEnemy -= 500;
+            game.projectspeed += 1;
+        }
+        updateBalance();
+    }
+    btnBuydamage.onclick = function () {
+        if (game.downEnemy > 0) {
+            game.downEnemy -= 500;
+            game.damage += 1;
         }
         updateBalance();
     }
