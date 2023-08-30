@@ -163,7 +163,7 @@ window.addEventListener('load', function () {
             if (this.frameX < this.maxFrame && this.game.lives > 0) {
                 this.frameX++;
                 if (this.game.speedup === true) {
-                    this.frameX++;
+                    this.frameX += 1;
                 }
             } else {
                 this.frameX = 0;
@@ -244,6 +244,8 @@ window.addEventListener('load', function () {
             this.frameY = 0;
             this.maxFrame = 37;
             this.type;
+            this.enemyprojectiles = [];
+            this.enemyshoottime = 0;
         }
         update() {
             this.x += (this.speedX - this.game.speed);
@@ -261,8 +263,9 @@ window.addEventListener('load', function () {
                 this.speedX = this.firstspeed;
             }
 
-            if (this instanceof Angler2) {
+            if (this instanceof Angler2 || this instanceof Boss) {
                 this.updateProjectiles();
+                console.log("fire!!!")
             }
         }
         draw(context) {
@@ -271,7 +274,11 @@ window.addEventListener('load', function () {
             let yp = this.y - 30;
             let lifeBarW = this.fullhealth * lifePixel;
             let xp = this.x + (this.width - lifeBarW) / 2;
-            context.drawImage(this.image, this.frameX * this.width, this.frameY * this.height,
+            let frameX = this.frameX;
+            if (this instanceof Boss) {
+                frameX = (this.frameX / 6).toFixed(0);
+            }
+            context.drawImage(this.image, frameX * this.width, this.frameY * this.height,
                 this.width, this.height, this.x, this.y, this.width, this.height);
             if (this.type !== 'drone') {
                 context.fillStyle = '#880000';
@@ -279,11 +286,31 @@ window.addEventListener('load', function () {
                 context.fillStyle = '#ff0000';
                 context.fillRect(xp, yp, this.lives * lifePixel, 10);
             }
-            if (this instanceof Angler2) {
+            if (this instanceof Angler2 || this instanceof Boss) {
                 this.enemyprojectiles.forEach(projectile => {
                     projectile.draw(context);
                 });
             }
+        }
+        shoot() {
+            if (this.enemyshoottime <= 1 && this instanceof Angler2) {
+                this.enemyprojectiles.push(new EnemyProjectile(this.game, this.x + 30, this.y + 100));
+            }
+            if (this.frameX === 1 && this instanceof Boss || this.frameX === 4 && this instanceof Boss) {
+                this.enemyprojectiles.push(new EnemyProjectile(this.game, this.x + 34, this.y + 19));
+            }
+
+        }
+        updateProjectiles() {
+            if (this.enemyshoottime < 90) {
+                this.enemyshoottime++;
+            } else {
+                this.enemyshoottime = 0;
+            }
+            this.enemyprojectiles.forEach(projectile => {
+                projectile.update();
+            });
+            this.enemyprojectiles = this.enemyprojectiles.filter(projectile => !projectile.markedForDeletion);
         }
     }
     class Angler1 extends Enemy {
@@ -310,26 +337,9 @@ window.addEventListener('load', function () {
             this.lives = 50;
             this.type = 'blaster';
             this.fullhealth = this.lives;
-            this.enemyprojectiles = [];
-            this.enemyshoottime = 0;
-        }
-        shoot() {
-            if (this.enemyshoottime <= 3) {
-                this.enemyprojectiles.push(new EnemyProjectile(this.game, this.x + 30, this.y + 100));
-            }
 
         }
-        updateProjectiles() {
-            if (this.enemyshoottime < 90) {
-                this.enemyshoottime++;
-            } else {
-                this.enemyshoottime = 0;
-            }
-            this.enemyprojectiles.forEach(projectile => {
-                projectile.update();
-            });
-            this.enemyprojectiles = this.enemyprojectiles.filter(projectile => !projectile.markedForDeletion);
-        }
+
     }
     class HiveWhale extends Enemy {
         constructor(game) {
@@ -428,6 +438,22 @@ window.addEventListener('load', function () {
         }
 
     }
+    class Boss extends Enemy {
+        constructor(game) {
+            super(game);
+            this.width = 67;
+            this.height = 69;
+            this.y = Math.random() * (this.game.height * 0.9 - this.height);
+            this.image = document.getElementById('boss');
+            this.frameY = 0;
+            this.lives = 100;
+            this.type = 'boss';
+            this.speedX = Math.random() * -1.2 - 0.2;
+            this.fullhealth = this.lives;
+            this.maxFrame = 30;
+        }
+
+    }
 
     class Layer {
         constructor(game, image, speedModifier) {
@@ -521,7 +547,6 @@ window.addEventListener('load', function () {
             if (this.game.speedup && this.game.gameOver === false) this.game.gameTime += 100;
             if (this.game.speeddown && this.game.gameOver === false) this.game.gameTime -= 100;
             const formattedTime = ((this.game.timeLimit - this.game.gameTime) * 0.001).toFixed(0);
-            const formattedup = ((this.game.uplimit - this.game.uptime) * 0.001).toFixed(0);
             context.fillText("coins: " + this.game.downEnemy, 20, 40);
             context.fillText('Damage: ' + this.game.damage, 20, 170);
             context.fillText('Time Left Until You Get To Enemy Base: ' + formattedTime + 's', 20, 190);
@@ -529,7 +554,6 @@ window.addEventListener('load', function () {
             context.fillStyle = 'white';
             context.fillRect(20, 200, 250, 20);
             context.fillStyle = 'white';
-            context.fillText('Time Left Until Next Upgrade: ' + (formattedup), 20, 263);
             context.fillStyle = this.color;
             if (this.game.gameOver) {
                 context.textAlign = 'center';
@@ -581,8 +605,8 @@ window.addEventListener('load', function () {
             this.speed = 1;
             this.debug = false;
             if (hardnessLevel === 'easy') {
-                this.lives = 500;
-                this.maxlives = 500;
+                this.lives = 100000000000000000000;
+                this.maxlives = 100000000000000000000;
             } else if (hardnessLevel === 'hard') {
                 this.lives = 200;
                 this.maxlives = 200;
@@ -591,11 +615,10 @@ window.addEventListener('load', function () {
                 this.maxlives = 300;
             }
             this.damage = 1;
-            this.downEnemy = 50000;
+            this.downEnemy = 10000;
             this.speedup = false;
             this.speeddown = false;
             this.shoottime = 0;
-            this.uptime = 0;
             this.pause = false;
             this.launch = 1;
             this.rocketlaunch = false;
@@ -639,18 +662,7 @@ window.addEventListener('load', function () {
                 this.ammo = 50;
                 this.backupammo--;
             }
-            if (this.uptime < this.uplimit) this.uptime += deltaTime;
-            else this.uptime = 0;
-            if (this.uptime >= this.uplimit) {
-                let help = Math.random();
-                if (help < 0.3 && this.lives + 50 < 100 && this.gameOver === false) {
-                    this.lives += 50;
-                } else if (help < 7 && this.gameOver === false) {
-                    this.damage++;
-                } else if (help < 1 && this.gameOver === false) {
-                    this.backupammo++;
-                }
-            }
+
 
             this.enemies.forEach(enemy => {
                 enemy.update();
@@ -674,8 +686,11 @@ window.addEventListener('load', function () {
                     && enemy.x < this.width && this.lives > 0) enemy.y += 2;
                 if (enemy.type === 'nonlucky' && enemy.y > this.player.y
                     && enemy.x < this.width && this.lives > 0) enemy.y -= 2;
-
-                if (enemy instanceof Angler2) {
+                if (enemy.type === 'boss' && enemy.y < this.player.y
+                    && enemy.x < this.width && this.lives > 0) enemy.y += 7;
+                if (enemy.type === 'boss' && enemy.y > this.player.y
+                    && enemy.x < this.width && this.lives > 0) enemy.y -= 7;
+                if (enemy instanceof Angler2 || enemy instanceof Boss) {
                     enemy.shoot();
                     enemy.enemyprojectiles.forEach(projectile => {
                         if (this.checkCollision(projectile, this.player) && this.gameOver === false
@@ -782,13 +797,7 @@ window.addEventListener('load', function () {
         }
         addEnemy() {
             const randomize = Math.random();
-            if (randomize < 0.1) this.enemies.push(new Angler1(this));
-            else if (randomize < 0.2) this.enemies.push(new Angler2(this));
-            else if (randomize < 0.3) this.enemies.push(new HiveWhale(this));
-            else if (randomize < 0.4) this.enemies.push(new Healing(this));
-            else if (randomize < 0.5) this.enemies.push(new Ammo(this));
-            else if (randomize < 0.6) this.enemies.push(new UltraSheild(this));
-            else if (randomize < 0.7) this.enemies.push(new Fix(this));
+            if (randomize < 0.75) this.enemies.push(new Boss(this));
         }
         checkCollision(rect1, rect2) {
             return (rect1.x < rect2.x + rect2.width &&
@@ -870,14 +879,14 @@ window.addEventListener('load', function () {
     }
     btnBuygrabedhealing.onclick = function () {
         if (game.downEnemy > 0) {
-            game.downEnemy -= 10000;
+            game.downEnemy -= 1000;
             game.grabedhealing += 5;
         }
         updateBalance();
     }
     btnBuymissile.onclick = function () {
         if (game.downEnemy > 0) {
-            game.downEnemy -= 5000;
+            game.downEnemy -= 1000;
             game.rocketammo += 5;
         }
         updateBalance();
