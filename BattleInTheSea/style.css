@@ -138,6 +138,9 @@
 #grabedhealing,
 #loadedammo,
 #sheild,
-#fix {
+#fix,
+#Damage,
+#Speed,
+#warning {
     display: none;
 }

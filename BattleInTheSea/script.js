@@ -522,6 +522,7 @@ window.addEventListener('load', function () {
             this.game = game;
             this.fontFamily = 'Bangers';
             this.color = 'white';
+            this.frameX = 0;
         }
         draw(context) {
             context.save();
@@ -550,10 +551,23 @@ window.addEventListener('load', function () {
             context.fillText("coins: " + this.game.downEnemy, 20, 40);
             context.fillText('Damage: ' + this.game.damage, 20, 170);
             context.fillText('Time Left Until You Get To Enemy Base: ' + formattedTime + 's', 20, 190);
+            context.fillText('Posabilty For Boss To Spawn: ' + this.game.evenharder.toFixed(2), 20, 270);
             context.fillText('HP: ', 20, 240);
             context.fillStyle = 'white';
             context.fillRect(20, 200, 250, 20);
             context.fillStyle = 'white';
+            if (this.game.bossbattle === true) {
+                let width = 55;
+                let height = 90;
+                let maxFrame = 5;
+                let image = document.getElementById("warning");
+                if (this.frameX <= maxFrame) {
+                    this.frameX++;
+                } else {
+                    this.frameX = 0;
+                }
+                context.drawImage(image, this.frameX * width, 0, width, height, 700, 250, width, height);
+            }
             context.fillStyle = this.color;
             if (this.game.gameOver) {
                 context.textAlign = 'center';
@@ -634,6 +648,9 @@ window.addEventListener('load', function () {
             this.repairkits = 1;
             this.repairing = false;
             this.projectspeed = 5
+            this.evenharder = 0.75;
+            this.bossbattle = false;
+            this.bossbattlewarningtime = 1000;
         }
         update(deltaTime, context) {
 
@@ -654,7 +671,7 @@ window.addEventListener('load', function () {
             if (this.rocketime < 50 && this.lives >= 0) {
                 this.rocketime++;
             }
-
+            this.bossbattlewarningtime++;
             if (this.gameTime > this.timeLimit || this.lives <= 0) this.gameOver = true;
             this.background.update();
             this.player.update(deltaTime);
@@ -747,7 +764,8 @@ window.addEventListener('load', function () {
                         projectile.markedForDeletion = true;
                         if (enemy.lives <= 0) {
                             enemy.markedForDeletion = true;
-                            this.downEnemy += 2000;
+                            this.evenharder += 0.1;
+                            this.downEnemy += 500;
                             if (enemy.type === 'hive') {
                                 this.enemies.push(new Drone(this, enemy.x, Math.random() * this.height));
                                 this.enemies.push(new Drone(this, enemy.x, Math.random() * this.height));
@@ -797,7 +815,18 @@ window.addEventListener('load', function () {
         }
         addEnemy() {
             const randomize = Math.random();
-            if (randomize < 0.75) this.enemies.push(new Boss(this));
+            if (randomize < 0.1) this.enemies.push(new Angler1(this));
+            // else if (randomize < 0.2) this.enemies.push(new Angler2(this));
+            // else if (randomize < 0.3) this.enemies.push(new HiveWhale(this));
+            // else if (randomize < 0.4) this.enemies.push(new Healing(this));
+            // else if (randomize < 0.5) this.enemies.push(new Ammo(this));
+            // else if (randomize < 0.6) this.enemies.push(new UltraSheild(this));
+            // else if (randomize < 0.7) this.enemies.push(new Fix(this));
+            else if (randomize < this.evenharder) {
+                this.enemies.push(new Boss(this));
+                this.bossbattle = true;
+                this.bossbattlewarningtime = 0;
+            }
         }
         checkCollision(rect1, rect2) {
             return (rect1.x < rect2.x + rect2.width &&
@@ -864,49 +893,49 @@ window.addEventListener('load', function () {
     }
 
     btnBuyammo.onclick = function () {
-        if (game.downEnemy > 0) {
+        if (game.downEnemy + 2000 > 0) {
             game.downEnemy -= 2000;
             game.backupammo += 5;
         }
         updateBalance();
     }
     btnBuyultrasheild.onclick = function () {
-        if (game.downEnemy > 0) {
+        if (game.downEnemy + 3000 > 0) {
             game.downEnemy -= 3000;
             game.forsefield += 5;
         }
         updateBalance();
     }
     btnBuygrabedhealing.onclick = function () {
-        if (game.downEnemy > 0) {
-            game.downEnemy -= 1000;
+        if (game.downEnemy + 2000 > 0) {
+            game.downEnemy -= 2000;
             game.grabedhealing += 5;
         }
         updateBalance();
     }
     btnBuymissile.onclick = function () {
-        if (game.downEnemy > 0) {
+        if (game.downEnemy + 1000 > 0) {
             game.downEnemy -= 1000;
             game.rocketammo += 5;
         }
         updateBalance();
     }
     btnBuyFix.onclick = function () {
-        if (game.downEnemy > 0) {
+        if (game.downEnemy + 500 > 0) {
             game.downEnemy -= 500;
             game.repairkits += 5;
         }
         updateBalance();
     }
     btnBuyspeed.onclick = function () {
-        if (game.downEnemy > 0) {
+        if (game.downEnemy + 500 > 0) {
             game.downEnemy -= 500;
             game.projectspeed += 1;
         }
         updateBalance();
     }
     btnBuydamage.onclick = function () {
-        if (game.downEnemy > 0) {
+        if (game.downEnemy + 500 > 0) {
             game.downEnemy -= 500;
             game.damage += 1;
         }
