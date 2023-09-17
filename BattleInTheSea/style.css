@@ -100,6 +100,12 @@
     height: 60;
 }
 
+.grid-item-img4 {
+    margin-top: 5px;
+    width: 35;
+    height: 60;
+}
+
 #grid-item-btn {
     align-self: center;
     margin-top: 5px;
@@ -140,7 +146,6 @@
 #sheild,
 #fix,
 #Damage,
-#Speed,
-#warning {
+#Speed {
     display: none;
 }
