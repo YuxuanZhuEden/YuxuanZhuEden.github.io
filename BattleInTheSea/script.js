@@ -713,7 +713,6 @@ window.addEventListener('load', function () {
             this.freeze = false
         }
         update(deltaTime, context) {
-
             if (!security.isGranted) return;
             if (!this.gameOver) this.gameTime += deltaTime;
             if (this.stopdamage < this.staydamagestop) this.lives -= this.staydamage * 0.1;
@@ -783,50 +782,39 @@ window.addEventListener('load', function () {
                     }
                 }
 
-                this.player.projectiles.forEach(projectile => {
-                    if (this.checkHit(projectile, enemy)) {
-                        // escape hit
-                        if (enemy.type === 'blaster') enemy.y -= 7;
-                        else if (enemy.type === 'drone') enemy.y -= 7;
-                        else if (enemy.type === 'hive') enemy.y -= 7;
-                        else if (enemy.type === 'nonlucky') enemy.y -= 7;
-                        else if (enemy.type === 'boss') enemy.y -= 7;
-                    } else if (this.lives > 0 && enemy.x < this.width) {
-                        // player still alive and enemy is visible
-                        if (enemy.y > this.player.y) {
-                            // enemy is higher, so it chase down
-                            if (enemy.type === 'boss') enemy.y -= 7;
-                            else if (enemy.type === 'drone') enemy.y -= 5;
-                            else if (enemy.type === 'blaster') enemy.y -= 3;
-                            else if (enemy.type === 'nonlucky') enemy.y -= 2;
-                            else if (enemy.type === 'hive') enemy.y -= 1;
-                        } else if (enemy.y < this.player.y) {
-                            // enemy is lower, so it chase up
-                            if (enemy.type === 'boss') enemy.y += 7;
-                            else if (enemy.type === 'drone') enemy.y += 5;
-                            else if (enemy.type === 'blaster') enemy.y += 3;
-                            else if (enemy.type === 'nonlucky') enemy.y += 2;
-                            else if (enemy.type === 'hive') enemy.y += 1;
+
+
+                if (enemy instanceof Angler2 || enemy instanceof Boss) {
+                    enemy.shoot();
+                    enemy.enemyprojectiles.forEach(projectile => {
+                        if (this.checkCollision(projectile, this.player) && this.gameOver === false
+                            && this.blocking === false && nailedIt < 0.5) {
+                            this.lives -= 3;
+                            this.staydamage++;
+                            this.stopdamage = 0
+                            projectile.markedForDeletion = true;
+                        } else if (this.checkCollision(projectile, this.player) && this.gameOver === false
+                            && this.blocking === true && nailedIt < 0.5) {
+                            this.sheildhealth -= 3;
+                            projectile.markedForDeletion = true;
                         }
-                    }
+                    });
+                }
 
-                    if (enemy instanceof Angler2 || enemy instanceof Boss) {
-                        enemy.shoot();
-                        enemy.enemyprojectiles.forEach(projectile => {
-                            if (this.checkCollision(projectile, this.player) && this.gameOver === false
-                                && this.blocking === false && nailedIt < 0.5) {
-                                this.lives -= 3;
-                                this.staydamage++;
-                                this.stopdamage = 0
-                                projectile.markedForDeletion = true;
-                            } else if (this.checkCollision(projectile, this.player) && this.gameOver === false
-                                && this.blocking === true && nailedIt < 0.5) {
-                                this.sheildhealth -= 3;
-                                projectile.markedForDeletion = true;
-                            }
-                        });
+                if (this.player.projectiles.some((projectile) => projectile.x < enemy.x + enemy.width)) {
+                    if (this.player.projectiles.some((projectile) =>
+                        projectile.y < enemy.y + enemy.height && enemy.y < projectile.y + projectile.height)) {
+                        if (enemy.type === 'blaster') enemy.y -= 3;
+                        else if (enemy.type === 'drone') enemy.y -= 4;
+                        else if (enemy.type === 'hive') enemy.y -= 2;
+                        else if (enemy.type === 'nonlucky') enemy.y -= 3;
+                        else if (enemy.type === 'boss') enemy.y -= 5;
                     }
+                } else {
+                    this.chasePlayer(enemy);
+                }
 
+                this.player.projectiles.forEach(projectile => {
                     if (this.checkCollision(projectile, enemy) && nailedIt < 0.5) {
                         if (badEnemyTypes.includes(enemy.type)) {
                             enemy.lives -= this.damage;
@@ -948,8 +936,26 @@ window.addEventListener('load', function () {
                 rect1.y < rect2.y + rect2.height &&
                 rect1.height + rect1.y > rect2.y;
         }
-        checkHit(rect1, rect2) {
-            return rect1.y + rect1.height > rect2.y && rect1.y < rect2.y + rect2.height;
+        chasePlayer(enemy) {
+            // chase player
+            if (this.lives > 0 && enemy.x < this.width) {
+                // player still alive and enemy is visible
+                if (enemy.y > this.player.y) {
+                    // enemy is higher, so it chase down
+                    if (enemy.type === 'boss') enemy.y -= 7;
+                    else if (enemy.type === 'drone') enemy.y -= 5;
+                    else if (enemy.type === 'blaster') enemy.y -= 3;
+                    else if (enemy.type === 'nonlucky') enemy.y -= 2;
+                    else if (enemy.type === 'hive') enemy.y -= 1;
+                } else if (enemy.y < this.player.y) {
+                    // enemy is lower, so it chase up
+                    if (enemy.type === 'boss') enemy.y += 7;
+                    else if (enemy.type === 'drone') enemy.y += 5;
+                    else if (enemy.type === 'blaster') enemy.y += 3;
+                    else if (enemy.type === 'nonlucky') enemy.y += 2;
+                    else if (enemy.type === 'hive') enemy.y += 1;
+                }
+            }
         }
     }
     function mySignIn() {
