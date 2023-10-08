@@ -283,10 +283,14 @@ window.addEventListener('load', function () {
             } else {
                 this.frameX = 0;
             }
-            let targetEnemy = this.game.enemies.find((enemy) => { badEnemyTypes.includes(enemy.type) })
-            if (this.y < targetEnemy) this.y += 1;
-            else if (this.y > targetEnemy) this.y -= 1;
-            console.log(targetEnemy)
+            let targetEnemy = this.game.enemies.find((enemy) =>
+                badEnemyTypes.includes(enemy.type) && (enemy.x > this.x)
+            )
+            if (targetEnemy) {
+                console.log("targetEnemy is not undefined:");
+                if (this.y < targetEnemy.y) this.y += 1;
+                else if (this.y > targetEnemy.y) this.y -= 1;
+            }
             if (this.firerate < this.maxfirerate) {
                 this.firerate++;
             }
