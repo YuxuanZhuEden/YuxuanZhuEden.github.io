@@ -4,6 +4,20 @@ window.addEventListener('load', function () {
     canvas.width = 1400;
     canvas.height = 500;
 
+    const EnemyType = {
+        nonlucky: "nonlucky",
+        blaster: "blaster",
+        hivewhale: "hivewhale",
+        drone: "drone",
+        boss: "boss",
+        heal: "heal",
+        ammo: "ammo",
+        sheild: "sheild",
+        repair: "repair",
+    }
+
+    const badEnemyTypes = [EnemyType.nonlucky, EnemyType.blaster, EnemyType.hivewhale, EnemyType.drone, EnemyType.boss];
+
     //classes
 
     class InputHandler {
@@ -18,7 +32,7 @@ window.addEventListener('load', function () {
                     this.game.speedup = true;
                 } else if (e.key === 'ArrowLeft') {
                     this.game.speeddown = true;
-                } else if (e.key === 'p' && this.game.pause === false) {
+                } else if (e.key === 'p' && !this.game.pause) {
                     this.game.pause = true;
                 } else if (e.key === 'p' && this.game.pause === true) {
                     this.game.pause = false;
@@ -40,7 +54,7 @@ window.addEventListener('load', function () {
                     this.game.speeddown = false;
                 } else if (e.key === 'r') {
                     this.game.rocketlaunch = false;
-                } else if (e.key === 'b' && this.game.blocking === false && this.game.forsefield > 0) {
+                } else if (e.key === 'b' && !this.game.blocking && this.game.forsefield > 0) {
                     this.game.forsefield--;
                     this.game.blocking = true;
                     this.game.sheildhealth = 125;
@@ -48,6 +62,10 @@ window.addEventListener('load', function () {
                     this.game.repairing = false;
                 } else if (e.key === 'h') {
                     this.game.healing = false;
+                } else if (e.key === 's') {
+                    this.game.hide = true;
+                    this.game.smokegernade--;
+                    this.game.player.smokestatus = 1
                 }
             });
         }
@@ -73,7 +91,7 @@ window.addEventListener('load', function () {
         }
 
     }
-    const badEnemyTypes = ['unlucky', 'blaster', 'hivewhale', 'drone'];
+
     class Rocketlauncher {
         constructor(game, x, y) {
             this.game = game;
@@ -87,16 +105,12 @@ window.addEventListener('load', function () {
             this.markedForDeletion = false;
             this.image = document.getElementById('rocket');
             this.speedY = 0;
-            this.targetEnemy = this.game.enemies?.find((enemy) => badEnemyTypes.includes(enemy.type));
         }
         update() {
             this.speedX += 2;
             this.x += this.speedX;
             if (this.x > 1700) this.markedForDeletion = true;
-            if (this.targetEnemy) {
-                this.speedY = this.speedX * (this.targetEnemy.y - this.y) / (this.targetEnemy.x - this.x);
-                this.y += this.speedY;
-            }
+
         }
         draw(context) {
             context.drawImage(this.image, this.x, this.y)
@@ -113,11 +127,15 @@ window.addEventListener('load', function () {
             this.frameX = 0;
             this.frameY = 0
             this.maxFrame = 37;
+            this.smokeFrameX = 0;
+            this.smokeMaxFrame = 4;
             this.speedy = 0;
             this.maxSpeed = 5;
             this.projectiles = [];
             this.bombs = [];
             this.image = document.getElementById('player');
+            this.smokestatus = 0;
+            this.smoketimer = 40;
         }
         update(deltaTime) {
             if (this.game.keys.includes('ArrowUp') && this.game.lives > 0) this.speedy = -this.maxSpeed;
@@ -135,12 +153,12 @@ window.addEventListener('load', function () {
 
             }
             if (this.game.healing === true && this.game.grabedhealing > 0
-                && this.game.lives + formattedheal < this.game.maxlives && this.game.gameOver === false) {
+                && this.game.lives + formattedheal < this.game.maxlives && !this.game.gameOver) {
                 this.game.lives += formattedheal;
                 this.game.grabedhealing--;
             }
             if (this.game.repairing === true && this.game.repairkits > 0
-                && this.game.sheildhealth + formattedheal < 125 && this.game.gameOver === false
+                && this.game.sheildhealth + formattedheal < 125 && !this.game.gameOver
                 && this.game.blocking === true) {
                 this.game.sheildhealth = 125;
                 this.game.repairkits--;
@@ -168,6 +186,22 @@ window.addEventListener('load', function () {
             } else {
                 this.frameX = 0;
             }
+            if (this.game.hide) {
+                if (this.smokeFrameX < this.smokeMaxFrame && this.smokestatus !== 2) {
+                    this.smokeFrameX++;
+                } else {
+
+                    if (this.smokestatus === 2 && this.smoketimer <= 40) {
+                        this.smoketimer++;
+                        if (this.smokeFrameX < this.smokeMaxFrame) {
+                            this.smokeFrameX++;
+                        } else this.smokeFrameX = 0;
+                    } else {
+                        this.smoketimer = 0;
+                        this.smokestatus++;
+                    }
+                }
+            }
         }
         draw(context) {
             if (this.game.debug) context.strokeRect(this.x, this.y, this.width, this.height);
@@ -193,6 +227,22 @@ window.addEventListener('load', function () {
                 context.fillRect(this.x + 15, this.y - 30, this.game.sheildhealth, 10);
 
             }
+            if (this.smokestatus === 1) {
+                context.drawImage(document.getElementById('smokeStart'),
+                    this.smokeFrameX * 37, 0, 37, 48,
+                    this.x - 25, this.y - 25, this.width + 50, this.height + 50);
+            } else if (this.smokestatus === 2) {
+                context.drawImage(document.getElementById('smokeMiddle'),
+                    this.smokeFrameX * 37, 0, 37, 48,
+                    this.x - 25, this.y - 25, this.width + 50, this.height + 50);
+            } else if (this.smokestatus === 3) {
+                context.drawImage(document.getElementById('smokeEnd'),
+                    this.smokeFrameX * 37, 0, 37, 48,
+                    this.x - 25, this.y - 25, this.width + 50, this.height + 50);
+            } else if (this.smokestatus === 4) {
+                this.smokestatus = 0;
+                this.game.hide = false;
+            }
         }
         shootTop() {
             if (this.game.ammo > 0 && this.game.lives > 0) {
@@ -209,12 +259,12 @@ window.addEventListener('load', function () {
         }
     }
     class Helper {
-        constructor(game) {
+        constructor(game, y) {
             this.game = game;
             this.width = 120;
             this.height = 190;
             this.x = 450;
-            this.y = 100;
+            this.y = y;
             this.frameX = 0;
             this.frameY = 0
             this.maxFrame = 37;
@@ -224,16 +274,8 @@ window.addEventListener('load', function () {
             this.firerate = 0;
             this.maxfirerate = 50;
             this.markedForDeletion = false;
-            if (hardnessLevel === 'easy') {
-                this.lives = 500;
-                this.maxlives = 500;
-            } else if (hardnessLevel === 'hard') {
-                this.lives = 200;
-                this.maxlives = 200;
-            } else {
-                this.lives = 300;
-                this.maxlives = 300;
-            }
+            this.lives = 500;
+            this.maxlives = 500;
         }
         update() {
             if (this.frameX <= this.maxFrame) {
@@ -241,12 +283,10 @@ window.addEventListener('load', function () {
             } else {
                 this.frameX = 0;
             }
-            this.game.enemies.forEach(enemy => {
-                enemy.update();
-                if (this.y < enemy.y) this.y += 1;
-                else if (this.y > enemy.y) this.y -= 1;
-            });
-
+            let targetEnemy = this.game.enemies.find((enemy) => { badEnemyTypes.includes(enemy.type) })
+            if (this.y < targetEnemy) this.y += 1;
+            else if (this.y > targetEnemy) this.y -= 1;
+            console.log(targetEnemy)
             if (this.firerate < this.maxfirerate) {
                 this.firerate++;
             }
@@ -265,8 +305,9 @@ window.addEventListener('load', function () {
             });
             context.drawImage(this.image, this.frameX * this.width, this.frameY * this.height,
                 this.width, this.height, this.x, this.y, this.width, this.height);
-            let healthpos = this.x - (((this.maxlives / 2) - this.width) / 2)
-            context.fillRect(healthpos, this.y, this.lives / 3, 10);
+            let healthWidth = this.lives / 3;
+            let healthpos = this.x - (healthWidth - this.width) / 2;
+            context.fillRect(healthpos, this.y - 10, healthWidth, 10);
         }
     }
     class EnemyProjectile {
@@ -306,6 +347,9 @@ window.addEventListener('load', function () {
             this.type;
             this.enemyprojectiles = [];
             this.enemyshoottime = 0;
+            this.scaleRate = 1;
+            this.blastposx = 0;
+            this.blastposy = 0;
         }
         update() {
             this.x += (this.speedX - this.game.speed);
@@ -336,9 +380,9 @@ window.addEventListener('load', function () {
             if (this instanceof Boss) {
                 frameX = (this.frameX / 6).toFixed(0);
             }
-            context.drawImage(this.image, frameX * this.width, this.frameY * this.height,
-                this.width, this.height, this.x, this.y, this.width, this.height);
-            if (this.type !== 'drone') {
+            context.drawImage(this.image, frameX * this.width / this.scaleRate, this.frameY * this.height / this.scaleRate,
+                this.width / this.scaleRate, this.height / this.scaleRate, this.x, this.y, this.width, this.height);
+            if (this.type !== EnemyType.drone) {
                 context.fillStyle = '#880000';
                 context.fillRect(xp, yp, lifeBarW, 10);
                 context.fillStyle = '#ff0000';
@@ -351,11 +395,13 @@ window.addEventListener('load', function () {
             }
         }
         shoot() {
-            if (this.enemyshoottime <= 1 && this instanceof Angler2 && this.game.freeze === false) {
-                this.enemyprojectiles.push(new EnemyProjectile(this.game, this.x + 30, this.y + 100));
-            }
-            if (this.frameX === 1 && this instanceof Boss && this.game.freeze === false || this.frameX === 4 && this instanceof Boss && this.game.freeze === false) {
-                this.enemyprojectiles.push(new EnemyProjectile(this.game, this.x + 34, this.y + 19));
+            if (!this.game.freeze) {
+                if (this.enemyshoottime <= 1 && this instanceof Angler2) {
+                    this.enemyprojectiles.push(new EnemyProjectile(this.game, this.x + this.blastposx, this.y + this.blastposy));
+                }
+                if (this.frameX === 1 && this instanceof Boss || this.frameX === 4 && this instanceof Boss) {
+                    this.enemyprojectiles.push(new EnemyProjectile(this.game, this.x + this.blastposx, this.y + this.blastposy));
+                }
             }
 
         }
@@ -380,7 +426,7 @@ window.addEventListener('load', function () {
             this.image = document.getElementById('angler1');
             this.frameY = Math.floor(Math.random() * 3);
             this.lives = 70;
-            this.type = 'nonlucky';
+            this.type = EnemyType.nonlucky;
             this.fullhealth = this.lives;
         }
     }
@@ -393,9 +439,10 @@ window.addEventListener('load', function () {
             this.image = document.getElementById('angler2');
             this.frameY = Math.floor(Math.random() * 2);
             this.lives = 50;
-            this.type = 'blaster';
+            this.type = EnemyType.blaster;
             this.fullhealth = this.lives;
-
+            this.blastposx = 30;
+            this.blastposy = 100;
         }
 
     }
@@ -408,7 +455,7 @@ window.addEventListener('load', function () {
             this.image = document.getElementById('hivewhale');
             this.frameY = 0;
             this.lives = 30;
-            this.type = 'hive';
+            this.type = EnemyType.hivewhale;
             this.speedX = Math.random() * -1.2 - 0.2;
             this.fullhealth = this.lives;
 
@@ -424,7 +471,7 @@ window.addEventListener('load', function () {
             this.image = document.getElementById('drone');
             this.frameY = Math.floor(Math.random() * 2);
             this.lives = 10;
-            this.type = 'drone';
+            this.type = EnemyType.drone;
             this.speedX = Math.random() * -1.2 - 0.2;
         }
     }
@@ -437,7 +484,7 @@ window.addEventListener('load', function () {
             this.y = Math.random() * (this.game.height * 0.9 - this.height);;
             this.image = document.getElementById('healthpackage');
             this.speedX = Math.random() * -10 - 2;
-            this.type = 'heal';
+            this.type = EnemyType.heal;
         }
         draw(context) {
             if (this.game.debug) context.strokeRect(this.x, this.y, this.width, this.height);
@@ -454,7 +501,7 @@ window.addEventListener('load', function () {
             this.y = Math.random() * (this.game.height * 0.9 - this.height);;
             this.image = document.getElementById('ammo');
             this.speedX = Math.random() * -10 - 2;
-            this.type = 'ammo';
+            this.type = EnemyType.ammo;
         }
         draw(context) {
             if (this.game.debug) context.strokeRect(this.x, this.y, this.width, this.height);
@@ -471,7 +518,7 @@ window.addEventListener('load', function () {
             this.y = Math.random() * (this.game.height * 0.9 - this.height);;
             this.image = document.getElementById('sheild');
             this.speedX = Math.random() * -10 - 2;
-            this.type = 'sheild';
+            this.type = EnemyType.sheild;
         }
         draw(context) {
             if (this.game.debug) context.strokeRect(this.x, this.y, this.width, this.height);
@@ -488,7 +535,7 @@ window.addEventListener('load', function () {
             this.y = Math.random() * (this.game.height * 0.9 - this.height);;
             this.image = document.getElementById('fix');
             this.speedX = Math.random() * -10 - 2;
-            this.type = 'repair';
+            this.type = EnemyType.repair;
         }
         draw(context) {
             if (this.game.debug) context.strokeRect(this.x, this.y, this.width, this.height);
@@ -499,16 +546,19 @@ window.addEventListener('load', function () {
     class Boss extends Enemy {
         constructor(game) {
             super(game);
-            this.width = 67;
-            this.height = 69;
+            this.scaleRate = 2;
+            this.width = 67 * this.scaleRate;
+            this.height = 69 * this.scaleRate;
             this.y = Math.random() * (this.game.height * 0.9 - this.height);
             this.image = document.getElementById('boss');
             this.frameY = 0;
             this.lives = 100;
-            this.type = 'boss';
+            this.type = EnemyType.boss;
             this.speedX = Math.random() * -1.2 - 0.2;
             this.fullhealth = this.lives;
             this.maxFrame = 30;
+            this.blastposx = 34;
+            this.blastposy = 19
         }
 
     }
@@ -603,13 +653,12 @@ window.addEventListener('load', function () {
             context.fillText("x" + this.game.forsefield, 1320, 160);
             context.drawImage(document.getElementById('fix'), 1350 - (30 + backupAmmoG) - 40, 170, 30, 30);
             context.fillText("x" + this.game.repairkits, 1320, 200);
-            if (this.game.speedup && this.game.gameOver === false) this.game.gameTime += 100;
-            if (this.game.speeddown && this.game.gameOver === false) this.game.gameTime -= 100;
+            context.drawImage(document.getElementById('smokegernade'), 1350 - (30 + backupAmmoG) - 40, 210, 40, 40);
+            context.fillText("x" + this.game.smokegernade, 1320, 235);
             const formattedTime = ((this.game.timeLimit - this.game.gameTime) * 0.001).toFixed(0);
             context.fillText("coins: " + this.game.downEnemy, 20, 40);
             context.fillText('Damage: ' + this.game.damage, 20, 170);
-            context.fillText('Time Left Until You Get To Enemy Base: ' + formattedTime + 's', 20, 190);
-            context.fillText('Posabilty For Boss To Spawn: ' + this.game.evenharder.toFixed(2), 20, 270);
+            context.fillText('Posabilty For Boss To Spawn: ' + this.game.evenharder.toFixed(2), 20, 190);
             context.fillText('HP: ', 20, 240);
             context.fillStyle = 'white';
             context.fillRect(20, 200, 250, 20);
@@ -640,9 +689,6 @@ window.addEventListener('load', function () {
                     message1 = "Get my repair kit and try again!";
                     message2 = "Blazes!";
 
-                } else {
-                    message1 = "you lose!";
-                    message2 = "try again next time!";
                 }
                 context.font = '150px ' + this.fontFamily;
                 context.fillText(message1, this.game.width / 2, this.game.height / 1.2,
@@ -672,13 +718,13 @@ window.addEventListener('load', function () {
             this.gameOver = false;
             this.score = 0;
             this.gameTime = 0;
-            this.timeLimit = 60 * 1000 * 10; // 10 min
+            this.timeLimit = 60 * 1000 * 20; // 20 min
             this.uplimit = 30000;
-            this.speed = 1;
+            this.speed = 0;
             this.debug = false;
             if (hardnessLevel === 'easy') {
-                this.lives = 500;
-                this.maxlives = 500;
+                this.lives = 1000000;
+                this.maxlives = 1000000;
             } else if (hardnessLevel === 'hard') {
                 this.lives = 200;
                 this.maxlives = 200;
@@ -686,7 +732,7 @@ window.addEventListener('load', function () {
                 this.lives = 300;
                 this.maxlives = 300;
             }
-            this.damage = 1;
+            this.damage = 5;
             this.downEnemy = 10000;
             this.speedup = false;
             this.speeddown = false;
@@ -709,8 +755,10 @@ window.addEventListener('load', function () {
             this.evenharder = 0.701;
             this.bossbattle = false;
             this.bossbattlewarningtime = 1000;
-            this.helpers = [];
-            this.freeze = false
+            this.helpers = [new Helper(this, 100), new Helper(this, 300)];
+            this.freeze = false;
+            this.smokegernade = 1;
+            this.hide = false;
         }
         update(deltaTime, context) {
             if (!security.isGranted) return;
@@ -738,63 +786,53 @@ window.addEventListener('load', function () {
                 this.ammo = 50;
                 this.backupammo--;
             }
-            this.helpers.forEach(helper => {
-                let targetEnemy = this.enemies.find((enemy) => { badEnemyTypes.includes(enemy.type) && enemy.x > helper.x })
-                if (helper.y < targetEnemy.y) helper.y += 1;
-                else if (helper.y > targetEnemy.y) helper.y -= 1;
-            });
 
             this.enemies.forEach(enemy => {
                 enemy.update();
-                let nailedIt = Math.random();
-                if (enemy.type === 'hive' && this.launch <= 0) {
+                if (enemy.type === EnemyType.hivewhale && this.launch <= 0) {
                     this.enemies.push(new Drone(this, enemy.x, Math.random() * this.height));
                 }
 
-                if (this.checkCollision(this.player, enemy) && nailedIt < 0.5) {
+                if (this.checkCollision(this.player, enemy)) {
                     enemy.markedForDeletion = true;
-                    if (enemy.type !== 'ammo' && enemy.type !== 'lucky' && enemy.type !== 'heal'
-                        && enemy.type !== 'sheild' && enemy.type !== 'repair' && this.gameOver === false
-                        && this.blocking === false) this.lives -= enemy.lives;
-                    else if (enemy.type !== 'ammo' && enemy.type !== 'lucky' && enemy.type !== 'heal'
-                        && enemy.type !== 'sheild' && enemy.type !== 'repair' && this.gameOver === false
+                    if (badEnemyTypes.includes(enemy.type) && !this.gameOver
+                        && !this.blocking) this.lives -= enemy.lives;
+                    else if (badEnemyTypes.includes(enemy.type) && !this.gameOver
                         && this.blocking === true) this.sheildhealth -= enemy.lives;
                     if (this.lives - enemy.lives < 0) this.lives = 0;
-                    if (enemy.type === 'heal' && this.gameOver === false && this.grabedhealing + 5 <= 30) {
+                    if (enemy.type === EnemyType.heal && !this.gameOver && this.grabedhealing + 5 <= 30) {
                         this.grabedhealing += 5;
                     }
-                    if (enemy.type === 'ammo' && this.gameOver === false && this.backupammo < 10) {
+                    if (enemy.type === EnemyType.ammo && !this.gameOver && this.backupammo < 10) {
                         this.backupammo += 3;
                     }
-                    if (enemy.type === 'ammo' && this.gameOver === false && this.backupammo < 10) {
+                    if (enemy.type === EnemyType.ammo && !this.gameOver && this.backupammo < 10) {
                         this.backupammo = 10;
                     }
-                    if (enemy.type === 'ammo' && this.gameOver === false && this.rocketammo < 20) {
+                    if (enemy.type === EnemyType.ammo && !this.gameOver && this.rocketammo < 20) {
                         this.rocketammo += 3;
-                    } if (enemy.type === 'ammo' && this.gameOver === false && this.rocketammo > 20) {
+                    } if (enemy.type === EnemyType.ammo && !this.gameOver && this.rocketammo > 20) {
                         this.rocketammo = 20;
                     }
-                    if (enemy.type === 'sheild' && this.gameOver === false && this.forsefield < 27) {
+                    if (enemy.type === EnemyType.sheild && !this.gameOver && this.forsefield < 27) {
                         this.forsefield += 2;
                     }
-                    if (enemy.type === 'repair' && this.gameOver === false && this.repairkits < 27) {
+                    if (enemy.type === EnemyType.repair && !this.gameOver && this.repairkits < 27) {
                         this.repairkits += 2;
                     }
                 }
 
-
-
                 if (enemy instanceof Angler2 || enemy instanceof Boss) {
                     enemy.shoot();
                     enemy.enemyprojectiles.forEach(projectile => {
-                        if (this.checkCollision(projectile, this.player) && this.gameOver === false
-                            && this.blocking === false && nailedIt < 0.5) {
+                        if (this.checkCollision(projectile, this.player) && !this.gameOver
+                            && !this.blocking) {
                             this.lives -= 3;
                             this.staydamage++;
                             this.stopdamage = 0
                             projectile.markedForDeletion = true;
-                        } else if (this.checkCollision(projectile, this.player) && this.gameOver === false
-                            && this.blocking === true && nailedIt < 0.5) {
+                        } else if (this.checkCollision(projectile, this.player) && !this.gameOver
+                            && this.blocking === true) {
                             this.sheildhealth -= 3;
                             projectile.markedForDeletion = true;
                         }
@@ -804,18 +842,18 @@ window.addEventListener('load', function () {
                 if (this.player.projectiles.some((projectile) => projectile.x < enemy.x + enemy.width)) {
                     if (this.player.projectiles.some((projectile) =>
                         projectile.y < enemy.y + enemy.height && enemy.y < projectile.y + projectile.height)) {
-                        if (enemy.type === 'blaster') enemy.y -= 3;
-                        else if (enemy.type === 'drone') enemy.y -= 4;
-                        else if (enemy.type === 'hive') enemy.y -= 2;
-                        else if (enemy.type === 'nonlucky') enemy.y -= 3;
-                        else if (enemy.type === 'boss') enemy.y -= 5;
+                        if (enemy.type === EnemyType.blaster) enemy.y -= 2;
+                        else if (enemy.type === EnemyType.drone) enemy.y -= 3;
+                        else if (enemy.type === EnemyType.hivewhale) enemy.y -= 1;
+                        else if (enemy.type === EnemyType.nonlucky) enemy.y -= 2;
+                        else if (enemy.type === EnemyType.boss) enemy.y -= 3;
                     }
                 } else {
                     this.chasePlayer(enemy);
                 }
 
                 this.player.projectiles.forEach(projectile => {
-                    if (this.checkCollision(projectile, enemy) && nailedIt < 0.5) {
+                    if (this.checkCollision(projectile, enemy)) {
                         if (badEnemyTypes.includes(enemy.type)) {
                             enemy.lives -= this.damage;
                             enemy.x += enemy.speedX + 50;
@@ -823,21 +861,38 @@ window.addEventListener('load', function () {
                         projectile.markedForDeletion = true;
                         if (enemy.lives <= 0) {
                             enemy.markedForDeletion = true;
-                            if (enemy.type === 'boss') this.bossbattle = false;
+                            if (enemy.type === EnemyType.boss) this.bossbattle = false;
                             this.evenharder += 0.001;
                             this.downEnemy += 500;
-                            if (enemy.type === 'hive') {
-                                this.enemies.push(new Drone(this, enemy.x, Math.random() * this.height));
-                                this.enemies.push(new Drone(this, enemy.x, Math.random() * this.height));
-                                this.enemies.push(new Drone(this, enemy.x, Math.random() * this.height));
-                                this.enemies.push(new Drone(this, enemy.x, Math.random() * this.height));
-                                this.enemies.push(new Drone(this, enemy.x, Math.random() * this.height));
+                            if (enemy.type === EnemyType.hivewhale) {
+                                for (let i = 0; i < 15; i++) {
+                                    this.enemies.push(new Drone(this, enemy.x, Math.random() * this.height));
+                                }
                             }
                         }
                     }
                 })
-                this.helpers.forEach(helper => {
-                    helper.update();
+
+                this.player.bombs.forEach(bomb => {
+                    if (this.checkCollision(bomb, enemy)) {
+                        if (enemy.type !== EnemyType.heal && enemy.type !== EnemyType.ammo) {
+                            enemy.lives -= 20 + this.damage;
+                            enemy.x += enemy.speedX + 100;
+                        }
+                        bomb.markedForDeletion = true;
+
+                        if (enemy.lives <= 0) {
+                            enemy.markedForDeletion = true;
+                        }
+                    }
+                })
+            });
+
+            this.helpers.forEach(helper => {
+                helper.update();
+
+
+                this.enemies.forEach(enemy => {
                     if (enemy instanceof Angler2 || enemy instanceof Boss) {
                         enemy.enemyprojectiles.forEach(projectile => {
                             if (this.checkCollision(projectile, helper)) {
@@ -853,44 +908,26 @@ window.addEventListener('load', function () {
 
 
                     helper.projectiles.forEach(bullet => {
-                        if (this.checkCollision(bullet, enemy) && nailedIt < 0.5) {
-                            if (enemy.type !== 'heal' && enemy.type !== 'ammo'
-                                && enemy.type !== 'sheild' && enemy.type !== 'repair') {
+                        if (this.checkCollision(bullet, enemy)) {
+                            if (badEnemyTypes.includes(enemy.type)) {
                                 enemy.lives -= this.damage;
                                 enemy.x += enemy.speedX + 50;
                             }
                             bullet.markedForDeletion = true;
                             if (enemy.lives <= 0) {
                                 enemy.markedForDeletion = true;
-                                if (enemy.type = 'boss') this.bossbattle = false;
+                                if (enemy.type === EnemyType.boss) this.bossbattle = false;
                                 this.evenharder += 0.001;
                                 this.downEnemy += 500;
-                                if (enemy.type === 'hive') {
-                                    this.enemies.push(new Drone(this, enemy.x, Math.random() * this.height));
-                                    this.enemies.push(new Drone(this, enemy.x, Math.random() * this.height));
-                                    this.enemies.push(new Drone(this, enemy.x, Math.random() * this.height));
-                                    this.enemies.push(new Drone(this, enemy.x, Math.random() * this.height));
-                                    this.enemies.push(new Drone(this, enemy.x, Math.random() * this.height));
+                                if (enemy.type === EnemyType.hivewhale) {
+                                    for (let i = 0; i < 5; i++) {
+                                        this.enemies.push(new Drone(this, enemy.x, Math.random() * this.height));
+                                    }
                                 }
                             }
                         }
                     })
                 })
-                this.player.bombs.forEach(bomb => {
-                    if (this.checkCollision(bomb, enemy) && nailedIt < 0.5) {
-                        if (enemy.type !== 'heal' && enemy.type !== 'ammo') {
-                            enemy.lives -= 20 + this.damage;
-                            enemy.x += enemy.speedX + 100;
-                        }
-                        bomb.markedForDeletion = true;
-
-                        if (enemy.lives <= 0) {
-                            enemy.markedForDeletion = true;
-                        }
-                    }
-                })
-
-
             });
             this.enemies = this.enemies.filter(enemy => !enemy.markedForDeletion)
             this.helpers = this.helpers.filter(helper => !helper.markedForDeletion)
@@ -938,22 +975,22 @@ window.addEventListener('load', function () {
         }
         chasePlayer(enemy) {
             // chase player
-            if (this.lives > 0 && enemy.x < this.width) {
+            if (this.lives > 0 && enemy.x < this.width && !this.hide) {
                 // player still alive and enemy is visible
-                if (enemy.y > this.player.y) {
-                    // enemy is higher, so it chase down
-                    if (enemy.type === 'boss') enemy.y -= 7;
-                    else if (enemy.type === 'drone') enemy.y -= 5;
-                    else if (enemy.type === 'blaster') enemy.y -= 3;
-                    else if (enemy.type === 'nonlucky') enemy.y -= 2;
-                    else if (enemy.type === 'hive') enemy.y -= 1;
-                } else if (enemy.y < this.player.y) {
+                if (enemy.y + enemy.blastposy > this.player.y + this.player.height) {
                     // enemy is lower, so it chase up
-                    if (enemy.type === 'boss') enemy.y += 7;
-                    else if (enemy.type === 'drone') enemy.y += 5;
-                    else if (enemy.type === 'blaster') enemy.y += 3;
-                    else if (enemy.type === 'nonlucky') enemy.y += 2;
-                    else if (enemy.type === 'hive') enemy.y += 1;
+                    if (enemy.type === EnemyType.boss) enemy.y -= 7;
+                    else if (enemy.type === EnemyType.drone) enemy.y -= 5;
+                    else if (enemy.type === EnemyType.blaster) enemy.y -= 3;
+                    else if (enemy.type === EnemyType.nonlucky) enemy.y -= 2;
+                    else if (enemy.type === EnemyType.hivewhale) enemy.y -= 1;
+                } else if (enemy.y + enemy.blastposy < this.player.y) {
+                    // enemy is higher, so it chase down
+                    if (enemy.type === EnemyType.boss) enemy.y += 7;
+                    else if (enemy.type === EnemyType.drone) enemy.y += 5;
+                    else if (enemy.type === EnemyType.blaster) enemy.y += 3;
+                    else if (enemy.type === EnemyType.nonlucky) enemy.y += 2;
+                    else if (enemy.type === EnemyType.hivewhale) enemy.y += 1;
                 }
             }
         }
@@ -976,15 +1013,28 @@ window.addEventListener('load', function () {
             shopDiv.style.visibility = "hidden";
 
             let lastTime = 0;
+            let red = 0;
+            let green = 150;
             function animate(timeStamp) {
                 const deltaTime = timeStamp - lastTime;
                 lastTime = timeStamp;
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
-                if (game.pause === false) {
+                if (!game.pause) {
                     game.update(deltaTime, ctx);
                 }
                 game.draw(ctx);
-
+                if (red === 255) {
+                    red = 0;
+                } else {
+                    red++;
+                }
+                if (green === 255) {
+                    green = 0;
+                } else {
+                    green++;
+                }
+                ctx.fillStyle = "rgb(0, green, 0)";
+                ctx.fill();
                 requestAnimationFrame(animate);
             }
             animate(0);
@@ -1064,10 +1114,18 @@ window.addEventListener('load', function () {
     btnBuybackup.onclick = function () {
         if (game.downEnemy >= 10000) {
             game.downEnemy -= 10000;
-            game.helpers.push(new Helper(game));
+            game.helpers.push(new Helper(game, Math.random() * 400));
         }
         updateBalance();
     }
+    btnBuySmokeGernade.onclick = function () {
+        if (game.downEnemy >= 800) {
+            game.downEnemy -= 800;
+            game.smokegernade++;
+        }
+        updateBalance();
+    }
+
 
     function updateBalance() {
         let balance = document.getElementById('howRich');
