@@ -36,12 +36,16 @@ window.addEventListener('load', function () {
                     this.game.pause = true;
                 } else if (e.key === 'p' && this.game.pause === true) {
                     this.game.pause = false;
-                } else if (e.key === 'r') {
+                } else if (e.key === 'm') {
                     this.game.rocketlaunch = true;
                 } else if (e.key === 'h') {
                     this.game.healing = true;
-                } else if (e.key === 'f') {
+                } else if (e.key === 'r') {
                     this.game.repairing = true;
+                } else if (e.key === 'w') {
+                    this.game.commandup = true;
+                } else if (e.key === 's') {
+                    this.game.commanddown = true;
                 }
             });
             window.addEventListener('keyup', e => {
@@ -66,6 +70,10 @@ window.addEventListener('load', function () {
                     this.game.hide = true;
                     this.game.invisability--
                     this.game.hidetimer = 1500
+                } else if (e.key === 'w') {
+                    this.game.commandup = false;
+                } else if (e.key === 's') {
+                    this.game.commanddown = false;
                 }
             });
         }
@@ -210,7 +218,8 @@ window.addEventListener('load', function () {
 
             }
             if (this.game.healing === true && this.game.grabedhealing > 0
-                && this.game.lives + formattedheal < this.game.maxlives && !this.game.gameOver) {
+                && this.game.lives + formattedheal < this.game.maxlives
+                && !this.game.gameOver) {
                 this.game.lives += formattedheal;
                 this.game.grabedhealing--;
             }
@@ -315,7 +324,7 @@ window.addEventListener('load', function () {
             if (this.firerate < this.maxfirerate) {
                 this.firerate++;
             }
-            else if (this.game.lives > 0) {
+            else if (this.game.lives > 0 && this.game.lives + 50 < this.game.maxlives + 100) {
                 this.firerate = 0;
                 this.game.lives += 50;
             }
@@ -362,6 +371,8 @@ window.addEventListener('load', function () {
             } else {
                 this.frameX = 0;
             }
+            if (this.game.commanddown) this.y += 5;
+            if (this.game.commandup) this.y -= 5;
             let targetEnemy = this.game.enemies.find((enemy) =>
                 badEnemyTypes.includes(enemy.type) && (enemy.x > this.x) && (enemy.x < this.game.width)
             )
@@ -847,6 +858,8 @@ window.addEventListener('load', function () {
             this.hidetimer = 1500;
             this.poison = 1;
             this.invisability = 1;
+            this.commandup = false;
+            this.commanddown = false;
         }
         update(deltaTime, context) {
             if (!security.isGranted) return;
@@ -859,6 +872,8 @@ window.addEventListener('load', function () {
             if (this.hidetimer <= 0) {
                 this.hide = false;
             }
+            this.fuel -= 1;
+            console.log(this.fuel)
             console.log(this.hidetimer);
             if (this.shoottime < 5) {
                 this.shoottime++;

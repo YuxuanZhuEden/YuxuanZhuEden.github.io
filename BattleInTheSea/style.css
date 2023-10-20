@@ -147,6 +147,18 @@
 #fix,
 #Damage,
 #Speed,
-#smokegernade {
+#smokegernade,
+#poison,
+#invisability,
+#harming,
+#weakness,
+#confusion,
+#sub,
+#dolphin,
+#smokeStart,
+#smokeMiddle,
+#smokeEnd,
+#smoke,
+#warning {
     display: none;
 }
