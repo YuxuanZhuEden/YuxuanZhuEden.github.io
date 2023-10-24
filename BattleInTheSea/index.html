@@ -9,7 +9,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Bangers&display=swap" rel="stylesheet"></link>
     <link rel="stylesheet" href="style.css"></link>
   </head>
-  <body>
+  <body id='body'>
     <div id="security" >
       <div>
         <label for="pass">Password:</label>
@@ -70,8 +70,12 @@
       <img id="confusion" src="assets/confusion.png" />
       <img id="sub" src="assets/submering.png" />
       <img id="dolphin" src="assets/healingdolphen.png" />
-      <img id="electricty" src="assets/electricbolt.png" />
-      <img id="eel" src="assets/eel.png" />
+      <img id="electrictyUp" src="assets/electricboltUp.png" />
+      <img id="electrictyDown" src="assets/electricboltDown.png" />
+      <img id="armor" src="assets/armor.png" />
+      <img id="eelAttack" src="assets/eel Attack.png" />
+      <img id="eelWalk" src="assets/eel Walk.png" />
+
 
       <audio id="audio" loop="true" autoplay="autoplay" controls="none">
         <source src="assets/backgroundMusic.mp3" />
@@ -102,7 +106,7 @@
           <button id="btnBuymissile" class="grid-item-btn">buy</button>
         </div>
         <div class="grid-item">
-          <Text>a box of screw drivers and metal scraps to fix your swat sheilds.  <br /> Cost:  500</Text>
+          <Text>a box of screw drivers and metal scraps to fix your SWAT sheilds.  <br /> Cost:  500</Text>
           <img class="grid-item-img1" src="assets/fix.png" />
           <button id="btnBuyFix" class="grid-item-btn">buy</button>
         </div>
@@ -117,14 +121,45 @@
           <button id="btnBuyultrasheild" class="grid-item-btn">buy</button>
         </div>
         <div class="grid-item">
-          <Text>A backup seahorse to help you. Dose not have sheild or infinite health, but has infinite ammo<br /> Cost:  10000</Text>
+          <Text>A seahorse to help you. Does not have sheild or infinite health, but has infinite ammo<br /> Cost:  10000</Text>
           <img class="grid-item-img4" src="assets/helper.png" />
           <button id="btnBuybackup" class="grid-item-btn">buy</button>
         </div>
         <div class="grid-item">
-          <Text>A smokebomb to hide yourself from machineguners<br /> Cost: 800</Text>
-          <img class="grid-item-img4" src="assets/smoke gerande.png" />
+          <Text>A invisability potion to hide<br /> Cost: 800</Text>
+          <img class="grid-item-img1" src="assets/invisability.png" />
           <button id="btnBuySmokeGernade" class="grid-item-btn">buy</button>
+
+        </div>
+        <div class="grid-item">
+          <Text>Armor that decreace the amount of damage dealt by enemies<br /> Cost: 1000</Text>
+          <img class="grid-item-img1" src="assets/armor.png" />
+          <button id="btnBuyArmor" class="grid-item-btn">buy</button>
+
+        </div>
+        <div class="grid-item">
+          <Text>A dolphin that heals you 50 HP<br /> Cost: 5000</Text>
+          <img class="grid-item-img5" src="assets/buyDolphin.png" />
+          <button id="btnBuyDolphin" class="grid-item-btn">buy</button>
+
+        </div>
+        <div class="grid-item">
+          <Text>A invisability potion to hide<br /> Cost: 800</Text>
+          <img class="grid-item-img1" src="assets/invisability.png" />
+          <button id="btnBuySmokeGernade" class="grid-item-btn">buy</button>
+
+        </div>
+        <div class="grid-item">
+          <Text>A invisability potion to hide<br /> Cost: 800</Text>
+          <img class="grid-item-img1" src="assets/invisability.png" />
+          <button id="btnBuySmokeGernade" class="grid-item-btn">buy</button>
+
+        </div>
+        <div class="grid-item">
+          <Text>A invisability potion to hide<br /> Cost: 800</Text>
+          <img class="grid-item-img1" src="assets/invisability.png" />
+          <button id="btnBuySmokeGernade" class="grid-item-btn">buy</button>
+
         </div>
         <button id="resumeGame">Exit</button>
         <p id="howRich">balance: </p>
