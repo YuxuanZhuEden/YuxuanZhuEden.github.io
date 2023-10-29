@@ -3,37 +3,173 @@
     <meta charset="UTF-8"></meta>
     <meta http-equiv="X-UA-Compatible" content="IE=edge"></meta>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"></meta>
-    <title>mine craft</title>
+    <title>Battle in the sea</title>
     <link rel="preconnect" href="https://fonts.googleapis.com"></link>
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin></link>
     <link href="https://fonts.googleapis.com/css2?family=Bangers&display=swap" rel="stylesheet"></link>
     <link rel="stylesheet" href="style.css"></link>
   </head>
-  <body>
-    <div id="security">
+  <body id='body'>
+    <div id="security" >
       <div>
         <label for="pass">Password:</label>
         <input type="text" id="pass" name="password"
           minlength="5" maxlength="5" required></input>
       </div>
       <div>
-        <label for="level">Easy:</label>
-        <input type="text" id="level" name="level"
-          minlength="1" maxlength="1" required></input>
+        <input type="radio" id="hard" name="hardness_level" value="hard" />
+        <label for="hard">hard</label>
+        <br />
+        <input type="radio" id="normal" name="hardness_level" value="normal" checked />
+        <label for="normal">normal</label>
+        <br />
+        <input type="radio" id="easy" name="hardness_level" value="easy" />
+        <label for="easy">easy</label>
       </div>
       <button id="submit">Sign in</button>
     </div>
 
+    <div id="gamePage" >
+      <canvas id="canvas1"></canvas>
+      <img id="player" src="assets/player.png" />
+      <img id="angler1" src="assets/angler1.png" />
+      <img id="angler2" src="assets/angler2.png" />
+      <img id="lucky" src="assets/lucky.png" />
+      <img id="hivewhale" src="assets/hivewhale.png" />
+      <img id="drone" src="assets/drone.png" />
+      <img id="boss" src="assets/boss.png" />
+      <img id="projectile" src="assets/projectile.png" />
+      <img id="layer1" src="assets/layer1.png" />
+      <img id="layer2" src="assets/layer2.png" />
+      <img id="layer3" src="assets/layer3.png" />
+      <img id="layer4" src="assets/layer4.png" />
+      <img id="healthpackage" src="assets/healthpackage2.png" />
+      <img id="ammo" src="assets/ammo.png" />
+      <img id="base" src="assets/base.png" />
+      <img id="boom" src="assets/smokeExplosion.png" />
+      <img id="rocket" src="assets/rocket.png" />
+      <img id="allrocket" src="assets/allrockets.png" />
+      <img id="redbackground" src="assets/redbackground.png" />
+      <img id="grabedhealing" src="assets/grabedhealing.png" />
+      <img id="loadedammo" src="assets/loadedprojectile.png" />
+      <img id="sheild" src="assets/ultrasheld.png" />
+      <img id="fix" src="assets/fix.png" />
+      <img id="Speed" src="assets/bullet logo.png" />
+      <img id="Damage" src="assets/bulletdamagelogo.png" />
+      <img id="boss" src="assets/boss.png" />
+      <img id="warning" src="assets/WARNING BOSS BATTLE AHEAD2.0.png" />
+      <img id="smokegernade" src="assets/smoke gerande.png" />
+      <img id="smokeStart" src="assets/smokeStart.png" />
+      <img id="smokeEnd" src="assets/smokeEnd.png" />
+      <img id="smokeMiddle" src="assets/smokeMiddle.png" />
+      <img id="smoke" src="assets/hide smoke.png" />
+      <img id="poison" src="assets/poison.png" />
+      <img id="invisability" src="assets/invisability.png" />
+      <img id="harming" src="assets/harming.png" />
+      <img id="weakness" src="assets/weakness.png" />
+      <img id="confusion" src="assets/confusion.png" />
+      <img id="sub" src="assets/submering.png" />
+      <img id="dolphin" src="assets/healingdolphen.png" />
+      <img id="electrictyUp" src="assets/electricboltUp.png" />
+      <img id="electrictyDown" src="assets/electricboltDown.png" />
+      <img id="armor" src="assets/armor.png" />
+      <img id="eelAttack" src="assets/eel Attack.png" />
+      <img id="eelWalk" src="assets/eel Walk.png" />
+      <img id="shock" src="assets/shockWave.png" />
+      <img id="turtle" src="assets/Turtle.png" />
+      <img id="forseField" src="assets/forsefield.png" />
+      <source id="gunSound" src="short_gun_sound.mp3" />
 
+      <audio id="audio" loop="true" autoplay="autoplay" controls="none">
+        <source src="assets/backgroundMusic.mp3" />
+      </audio>
+      <button id="sellButton">sell</button>
+      <button id="shopButton">shop</button>
+    </div>
 
-    <canvas id="canvas1"></canvas>
+    <div id="shoppingPage" >
+      <div class="grid-container">
+        <div class="grid-item">
+          <Text>A box of bullets to use in your turret.  <br /> Cost:  2000</Text>
+          <img class="grid-item-img1" src="assets/ammo.png" />
+          <button id="btnBuyammo" class="grid-item-btn">buy</button>
+        </div>
+        <div class="grid-item">
+          <Text>projectile speed increase.  <br /> Cost:  500</Text>
+          <img class="grid-item-img1" src="assets/bullet logo.png" />
+          <button id="btnBuyspeed" class="grid-item-btn">buy</button>
+        </div>
+        <div class="grid-item">
+          <Text>A box of medicl items to heal with.  <br /> Cost:  2000</Text>
+          <img class="grid-item-img1" src="assets/grabedhealing.png" />
+          <button id="btnBuygrabedhealing" class="grid-item-btn">buy</button>
+        </div>
+        <div class="grid-item">
+          <Text>A missile that will target and blow up a random enemy. <br /> Cost:  1000</Text>
+          <img class="grid-item-img3" src="assets/rocket.png" />
+          <button id="btnBuymissile" class="grid-item-btn">buy</button>
+        </div>
+        <div class="grid-item">
+          <Text>a box of screw drivers and metal scraps to fix your SWAT sheilds.  <br /> Cost:  500</Text>
+          <img class="grid-item-img1" src="assets/fix.png" />
+          <button id="btnBuyFix" class="grid-item-btn">buy</button>
+        </div>
+        <div class="grid-item">
+          <Text>projectile damage increase.  <br /> Cost:  500</Text>
+          <img class="grid-item-img1" src="assets/bulletdamagelogo.png" />
+          <button id="btnBuydamage" class="grid-item-btn">buy</button>
+        </div>
+        <div class="grid-item">
+          <Text>A swat sheild to block the enemys lazerbeams.  <br /> Cost:  3000</Text>
+          <img class="grid-item-img2" src="assets/ultrasheld.png" />
+          <button id="btnBuyultrasheild" class="grid-item-btn">buy</button>
+        </div>
+        <div class="grid-item">
+          <Text>A seahorse to help you. Does not have sheild or infinite health, but has infinite ammo<br /> Cost:  10000</Text>
+          <img class="grid-item-img4" src="assets/helper.png" />
+          <button id="btnBuybackup" class="grid-item-btn">buy</button>
+        </div>
+        <div class="grid-item">
+          <Text>A invisability potion to hide<br /> Cost: 800</Text>
+          <img class="grid-item-img1" src="assets/invisability.png" />
+          <button id="btnBuySmokeGernade" class="grid-item-btn">buy</button>
 
-    <img id="iron pick" src="assets/iron pickaxe.png" />
+        </div>
+        <div class="grid-item">
+          <Text>Armor that decreace the amount of damage dealt by enemies<br /> Cost: 1000</Text>
+          <img class="grid-item-img1" src="assets/armor.png" />
+          <button id="btnBuyArmor" class="grid-item-btn">buy</button>
 
-    <img id="gold pick" src="assets/gold pickaxe.png" />
+        </div>
+        <div class="grid-item">
+          <Text>A dolphin that heals you 50 HP<br /> Cost: 5000</Text>
+          <img class="grid-item-img5" src="assets/buyDolphin.png" />
+          <button id="btnBuyDolphin" class="grid-item-btn">buy</button>
 
-    <img id="diamond pick" src="assets/diamond pickaxe.png" />
+        </div>
+        <div class="grid-item">
+          <Text>A invisability potion to hide<br /> Cost: 800</Text>
+          <img class="grid-item-img1" src="assets/invisability.png" />
+          <button id="btnBuySmokeGernade" class="grid-item-btn">buy</button>
 
+        </div>
+        <div class="grid-item">
+          <Text>A invisability potion to hide<br /> Cost: 800</Text>
+          <img class="grid-item-img1" src="assets/invisability.png" />
+          <button id="btnBuySmokeGernade" class="grid-item-btn">buy</button>
+
+        </div>
+        <div class="grid-item">
+          <Text>A invisability potion to hide<br /> Cost: 800</Text>
+          <img class="grid-item-img1" src="assets/invisability.png" />
+          <button id="btnBuySmokeGernade" class="grid-item-btn">buy</button>
+
+        </div>
+        <button id="resumeGame">Exit</button>
+        <p id="howRich">balance: </p>
+
+      </div>
+    </div>
     <script src="script.js"></script>
-  </body>
+  </body >
 </html >
