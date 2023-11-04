@@ -28,6 +28,11 @@ body {
     overflow: visible;
 }
 
+#marketPage {
+    visibility: hidden;
+    overflow: visible;
+}
+
 #canvas1 {
     border: 5px solid black;
     position: absolute;
@@ -41,8 +46,6 @@ body {
     position: fixed;
 }
 
-
-
 #audio {
     position: absolute;
     top: 92%;
@@ -53,9 +56,6 @@ body {
 }
 
 #shopButton {
-    position: absolute;
-    top: -2%;
-    left: -1%;
     width: 170;
     height: 65;
     font-size: 30px;
@@ -65,7 +65,24 @@ body {
     padding: 6px 12px;
     cursor: pointer;
     border: 4px solid #ffcc00;
-    margin: 12px;
+}
+
+#sellButton {
+    width: 170;
+    height: 65;
+    font-size: 30px;
+    border-radius: 4px;
+    background-color: #ffee00;
+    color: white;
+    padding: 6px 12px;
+    cursor: pointer;
+    border: 4px solid #ffcc00;
+}
+
+.buttons {
+    top: 1%;
+    left: 1%;
+    cursor: default;
     position: fixed;
 }
 
@@ -83,6 +100,30 @@ body {
 }
 
 .grid-item {
+    background-color: rgba(255, 255, 255, 0.8);
+    border: 1px solid rgba(0, 0, 0, 0.8);
+    padding: 10px;
+    font-size: 20px;
+    text-align: center;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+
+.sell-grid-container {
+    display: grid;
+    grid-template-columns: auto auto auto;
+    grid-template-rows: auto auto auto;
+    background-color: #2196F3;
+    padding: 5px;
+    position: absolute;
+    top: 10%;
+    left: 0;
+    width: 100%;
+    height: 90%;
+}
+
+.sell-grid-item {
     background-color: rgba(255, 255, 255, 0.8);
     border: 1px solid rgba(0, 0, 0, 0.8);
     padding: 10px;
@@ -178,6 +219,15 @@ body {
 #smoke,
 #warning,
 #armor,
-#eel {
+#eel,
+#shock,
+#electrictyUp,
+#electrictyDown,
+#eelWalk,
+#eelAttack,
+#forseField,
+#turtle,
+#enemyprojectile,
+#enemyrocket {
     display: none;
 }
