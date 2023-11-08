@@ -263,14 +263,14 @@ window.addEventListener('load', function () {
             else this.speedy = 0;
             let heal = Math.random() * 200;
             const formattedheal = parseInt(heal);
-            if (this.game.keys.includes(' ') && this.game.shoottime === 5) {
+            if (this.game.keys.includes(' ') && this.game.shoottime >= this.game.firerate) {
                 this.game.player.shootTop();
                 this.game.shoottime = 0;
             }
+            console.log(this.game.shoottime)
             if (this.game.rocketlaunch === true && this.game.rocketime === 50) {
                 this.launchtherocket();
                 this.game.rocketime = 0;
-
             }
             if (this.game.healing === true && this.game.grabedhealing > 0
                 && this.game.lives + formattedheal < this.game.maxlives
@@ -368,7 +368,7 @@ window.addEventListener('load', function () {
             this.bombs = [];
             this.image = document.getElementById('dolphin');
             this.firerate = 0;
-            this.maxfirerate = 30;
+
             this.markedForDeletion = false;
             this.lives = 1000;
             this.maxlives = 1000;
@@ -517,8 +517,9 @@ window.addEventListener('load', function () {
         }
     }
     class Helper {
-        constructor(game, y) {
+        constructor(game, y, mode) {
             this.game = game;
+            this.mode = mode;
             this.width = 120;
             this.height = 190;
             this.x = 300;
@@ -535,6 +536,13 @@ window.addEventListener('load', function () {
             this.lives = 1000;
             this.maxlives = 1000;
             this.type = "seahorse";
+            if (this.mode = 1) {
+                this.maxfirerate = 50;
+                this.damage = 10;
+            } else {
+                this.maxfirerate = 20;
+                this.damage = 3;
+            }
         }
         update() {
             if (this.frameX <= this.maxFrame) {
@@ -973,13 +981,12 @@ window.addEventListener('load', function () {
             context.fillText("x" + this.game.shields, 1320, 160);
             context.drawImage(document.getElementById('fix'), 1350 - (30 + backupAmmoG) - 40, 170, 30, 30);
             context.fillText("x" + this.game.repairkits, 1320, 200);
-            context.drawImage(document.getElementById('smokegernade'), 1350 - (30 + backupAmmoG) - 40, 210, 40, 40);
+            context.drawImage(document.getElementById('invisability'), 1350 - (30 + backupAmmoG) - 40, 210, 40, 40);
             context.fillText("x" + this.game.smokegernade, 1320, 235);
-            context.fillText("coins: " + this.game.downEnemy, 20, 40);
+            context.drawImage(document.getElementById('coin'), 20, 5, 40, 40);
+            context.fillText("x" + this.game.downEnemy, 65, 40);
             context.fillText('Damage: ' + this.game.damage, 20, 170);
-            context.fillText('Posabilty For Boss To Spawn: ' + this.game.evenharder.toFixed(2), 20, 190);
-            context.fillText('armor: ' + this.game.armor, 20, 270);
-
+            context.fillText('armor: ' + this.game.armor, 20, 190);
             context.fillText('HP: ', 20, 240);
             context.fillStyle = 'white';
             context.fillRect(20, 200, 250, 20);
@@ -1049,7 +1056,7 @@ window.addEventListener('load', function () {
             if (hardnessLevel === "easy") {
                 this.lives = 500;
                 this.maxlives = 500;
-                this.helpers = [new Turtle(this, 0), new Turtle(this, 0), new eel(this, 0), new eel(this, 0), new Helper(this, 100), new Helper(this, 300), new Dolphin(this, 300)];
+                this.helpers = [new Turtle(this, 0), new Turtle(this, 0), new eel(this, 0), new eel(this, 0), new Helper(this, 100, 1), new Helper(this, 300, 2), new Dolphin(this, 300)];
             } else if (hardnessLevel === "hard") {
                 this.lives = 200;
                 this.maxlives = 200;
@@ -1091,6 +1098,7 @@ window.addEventListener('load', function () {
             this.commandup = false;
             this.commanddown = false;
             this.armor = 1;
+            this.firerate = 100;
         }
         update(deltaTime, context) {
             if (!security.isGranted) return;
@@ -1106,7 +1114,7 @@ window.addEventListener('load', function () {
             if (this.forsefieldHp <= 0) {
                 this.forsefield = false;
             }
-            if (this.shoottime < 5) {
+            if (this.shoottime <= this.firerate) {
                 this.shoottime++;
             }
             if (this.sheildhealth <= 0) this.blocking = false;
@@ -1277,7 +1285,7 @@ window.addEventListener('load', function () {
                     helper.projectiles.forEach(bullet => {
                         if (this.checkCollision(bullet, enemy)) {
                             if (badEnemyTypes.includes(enemy.type)) {
-                                enemy.lives -= this.damage;
+                                enemy.lives -= helper.damage;
                                 bullet.markedForDeletion = true;
                                 enemy.x += enemy.speedX + 50;
                                 if (bullet.type === 'electrify') {
@@ -1451,6 +1459,13 @@ window.addEventListener('load', function () {
         }
         updateBalance();
     }
+    btnBuyfirerate.onclick = function () {
+        if (game.downEnemy >= 3000 && game.firerate > 5) {
+            game.downEnemy -= 3000;
+            game.firerate -= 5;
+        }
+        updateBalance();
+    }
     btnBuyultrasheild.onclick = function () {
         if (game.downEnemy >= 3000) {
             game.downEnemy -= 3000;
@@ -1581,20 +1596,8 @@ window.addEventListener('load', function () {
         }
         updateBalance();
     }
-    btnSellspeed.onclick = function () {
-        if (game.projectile_speed >= 5) {
-            game.downEnemy += 500;
-            game.projectile_speed -= 1;
-        }
-        updateBalance();
-    }
-    btnSelldamage.onclick = function () {
-        if (game.damage >= 5) {
-            game.downEnemy += 500;
-            game.damage -= 1;
-        }
-        updateBalance();
-    }
+
+
     btnSellbackup.onclick = function () {
         if (game.helpers.length > 0) {
             game.downEnemy += 10000;

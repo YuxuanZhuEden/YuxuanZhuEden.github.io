@@ -36,7 +36,7 @@ body {
 #canvas1 {
     border: 5px solid black;
     position: absolute;
-    top: 50%;
+    top: 51%;
     left: 50%;
     transform: translate(-50%, -50%);
     background: #b3d1ff;
@@ -80,8 +80,8 @@ body {
 }
 
 .buttons {
-    top: 1%;
-    left: 1%;
+    top: 0%;
+    left: 0%;
     cursor: default;
     position: fixed;
 }
