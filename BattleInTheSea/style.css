@@ -36,9 +36,9 @@ body {
 #canvas1 {
     border: 5px solid black;
     position: absolute;
-    top: 51%;
-    left: 50%;
-    transform: translate(-50%, -50%);
+    top: 0%;
+    left: 0%;
+    transform: translate(0%, 0%);
     background: #b3d1ff;
     max-width: 100%;
     max-height: 100%;
@@ -48,7 +48,7 @@ body {
 
 #audio {
     position: absolute;
-    top: 92%;
+    top: 85%;
     left: 0%;
     width: 250;
     height: 40;
@@ -80,8 +80,8 @@ body {
 }
 
 .buttons {
-    top: 0%;
-    left: 0%;
+    top: 82%;
+    left: 20%;
     cursor: default;
     position: fixed;
 }

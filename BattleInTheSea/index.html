@@ -17,6 +17,10 @@
           minlength="5" maxlength="5" required></input>
       </div>
       <div>
+        <input type="checkbox" id="vip" name="veryimportantperson" value="vip" />
+        <label for="easy">Are You VIP?</label>
+      </div>
+      <div>
         <input type="radio" id="hard" name="hardness_level" value="hard" />
         <label for="hard">hard</label>
         <br />
@@ -26,8 +30,12 @@
         <input type="radio" id="easy" name="hardness_level" value="easy" />
         <label for="easy">easy</label>
       </div>
+
+
       <button id="submit">Sign in</button>
+
     </div>
+
 
     <div id="gamePage" >
       <canvas id="canvas1"></canvas>
@@ -167,6 +175,12 @@
           <Text>A eel who zaps enemys<br /> Value: 5000</Text>
           <img class="grid-item-img1" src="assets/buyeel.png" />
           <button id="btnBuyeel" class="grid-item-btn">buy</button>
+
+        </div>
+        <div class="grid-item">
+          <Text>a forsefield given by your fellow turtle helper<br /> Value: 1000</Text>
+          <img class="grid-item-img1" src="assets/forsefield.png" />
+          <button id="btnBuymaxforsefieldHp" class="grid-item-btn">buy</button>
 
         </div>
         <button id="resumeGame">Exit</button>
