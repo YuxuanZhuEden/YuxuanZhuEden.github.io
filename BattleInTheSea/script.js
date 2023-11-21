@@ -60,6 +60,10 @@ window.addEventListener('load', function () {
                 } else if (e.key === 'f') {
                     this.game.forsefield = true;
                     this.game.forsefieldHp = this.game.maxforsefieldHp;
+                } else if (e.key === 'i' && this.game.invisability > 0) {
+                    this.game.hide = true;
+                    this.game.invisability--;
+                    this.game.hidetimer = this.game.maxhidetimer;
                 }
             });
             window.addEventListener('keyup', e => {
@@ -78,10 +82,6 @@ window.addEventListener('load', function () {
                     this.game.sheildhealth = 125;
                 } else if (e.key === 'h') {
                     this.game.healing = false;
-                } else if (e.key === 'i' && this.game.invisability > 0) {
-                    this.game.hide = true;
-                    this.game.invisability--;
-                    this.game.hidetimer = 1500
                 } else if (e.key === 'w') {
                     this.game.commandup = false;
                 } else if (e.key === 's') {
@@ -114,7 +114,7 @@ window.addEventListener('load', function () {
         update() {
             this.x += this.speedX;
             this.y += this.speedY;
-            if (this.x > this.game.width) this.markedForDeletion = true;
+            if (this.x > this.game.player.x + this.game.ammoreach) this.markedForDeletion = true;
         }
         draw(context) {
             context.drawImage(this.image, this.x, this.y)
@@ -346,9 +346,9 @@ window.addEventListener('load', function () {
                 context.strokeRect(this.x, this.y, this.width, this.height);
             }
             context.fillStyle = '#880000';
-            context.fillRect(50, 225, this.game.maxlives / 4, 20);
+            context.fillRect(50, 225, this.game.maxlives / 6, 20);
             context.fillStyle = 'red';
-            context.fillRect(50, 225, this.game.lives / 4, 20);
+            context.fillRect(50, 225, this.game.lives / 6, 20);
             this.bombs.forEach(bomb => {
                 bomb.draw(context);
             });
@@ -536,9 +536,8 @@ window.addEventListener('load', function () {
         }
     }
     class Helper {
-        constructor(game, y, mode) {
+        constructor(game, y) {
             this.game = game;
-            this.mode = mode;
             this.width = 120;
             this.height = 190;
             this.x = 300;
@@ -555,13 +554,13 @@ window.addEventListener('load', function () {
             this.lives = 1000;
             this.maxlives = 1000;
             this.type = "seahorse";
-            if (this.mode = 1) {
-                this.maxfirerate = 50;
-                this.damage = 10;
-            } else {
-                this.maxfirerate = 20;
-                this.damage = 3;
-            }
+            // if (this.mode = 1) {
+            //     this.maxfirerate = 50;
+            //     this.damage = 10;
+            // } else {
+            //     this.maxfirerate = 20;
+            //     this.damage = 3;
+            // }
         }
         update() {
             if (this.frameX <= this.maxFrame) {
@@ -668,9 +667,11 @@ window.addEventListener('load', function () {
             this.blastposx = 0;
             this.blastposy = 0;
             this.shocked = false;
+            this.misslefirerate = 0;
         }
         update() {
             this.x += (this.speedX - this.game.speed);
+            this.misslefirerate++;
             if (this.x + this.width < 0) this.markedForDeletion = true;
             if (this.frameX < this.maxFrame) {
                 this.frameX++;
@@ -742,8 +743,11 @@ window.addEventListener('load', function () {
                     this.enemyprojectiles.push(new EnemyProjectile(this.game, this.x + this.blastposx, this.y + this.blastposy));
                 }
                 if (this.frameX === 3 && this instanceof Boss) {
-                    this.enemybomb.push(new enemyRocket(this.game, this.x + this.blastposx, this.y + this.blastposy));
                     this.enemyprojectiles.push(new EnemyProjectile(this.game, this.x + this.blastposx, this.y + this.blastposy));
+                }
+                if (this.misslefirerate === 40 && this instanceof Boss) {
+                    this.enemybomb.push(new enemyRocket(this.game, this.x + this.blastposx, this.y + this.blastposy));
+                    this.misslefirerate = 0;
                 }
             }
 
@@ -772,7 +776,7 @@ window.addEventListener('load', function () {
             this.y = Math.random() * (this.game.height * 0.9 - this.height);
             this.image = document.getElementById('angler1');
             this.frameY = Math.floor(Math.random() * 3);
-            this.lives = 70;
+            this.lives = 200;
             this.type = EnemyType.nonlucky;
             this.fullhealth = this.lives;
         }
@@ -1001,7 +1005,7 @@ window.addEventListener('load', function () {
             context.drawImage(document.getElementById('fix'), 1350 - (30 + backupAmmoG) - 40, 170, 30, 30);
             context.fillText("x" + this.game.repairkits, 1320, 200);
             context.drawImage(document.getElementById('invisability'), 1350 - (30 + backupAmmoG) - 40, 210, 40, 40);
-            context.fillText("x" + this.game.smokegernade, 1320, 235);
+            context.fillText("x" + this.game.invisability, 1320, 235);
             context.drawImage(document.getElementById('coin'), 20, 5, 40, 40);
             context.fillText("x" + this.game.downEnemy, 65, 40);
             context.fillText('Damage: ' + this.game.damage, 20, 170);
@@ -1074,17 +1078,17 @@ window.addEventListener('load', function () {
             this.speed = 0;
             this.debug = false;
             if (hardnessLevel === "easy") {
-                this.lives = 500;
-                this.maxlives = 500;
-                this.helpers = [new Turtle(this, 0), new Turtle(this, 0), new eel(this, 0), new eel(this, 0), new Helper(this, 100, 1), new Helper(this, 300, 2), new Dolphin(this, 300)];
+                this.lives = 1000;
+                this.maxlives = 1000;
+                this.helpers = [new Turtle(this, 0), new eel(this, 0), new Helper(this, 300), new Dolphin(this, 300)];
             } else if (hardnessLevel === "hard") {
-                this.lives = 200;
-                this.maxlives = 200;
-                this.helpers = [new Helper(this, 300)];
-            } else {
                 this.lives = 300;
                 this.maxlives = 300;
-                this.helpers = [new Turtle(this, 0), new eel(this, 0), new Helper(this, 300), new Dolphin(this, 300)];
+                this.helpers = [new Turtle(this, 300)];
+            } else {
+                this.lives = 500;
+                this.maxlives = 500;
+                this.helpers = [new Turtle(this, 0), new eel(this, 0)];
             }
 
             this.vip = vip;
@@ -1114,13 +1118,15 @@ window.addEventListener('load', function () {
             this.freeze = false;
             this.smokegernade = 1;
             this.hide = false;
-            this.hidetimer = 1500;
+            this.hidetimer = 0;
+            this.maxhidetimer = 1500;
             this.poison = 1;
             this.invisability = 1;
             this.commandup = false;
             this.commanddown = false;
             this.armor = 1;
             this.firerate = 100;
+            this.ammoreach = 300;
         }
         update(deltaTime, context) {
             if (!this.gameOver) this.gameTime += deltaTime;
@@ -1130,7 +1136,7 @@ window.addEventListener('load', function () {
             }
             this.stopdamage++;
             if (this.hide) {
-                this.hidetimer--
+                this.hidetimer--;
             }
             if (this.hidetimer <= 0) {
                 this.hide = false;
@@ -1352,7 +1358,7 @@ window.addEventListener('load', function () {
             else if (randomize < 0.5) this.enemies.push(new Ammo(this));
             else if (randomize < 0.6) this.enemies.push(new UltraSheild(this));
             else if (randomize < 0.7) this.enemies.push(new Fix(this));
-            else if (randomize < 0.7) {
+            else {
                 this.enemies.push(new Boss(this));
                 this.bossbattle = true;
                 this.bossbattlewarningtime = 0;
@@ -1586,6 +1592,13 @@ window.addEventListener('load', function () {
         if (game.downEnemy >= 5000) {
             game.downEnemy -= 5000;
             game.helpers.push(new Turtle(game, Math.random() * 400));
+        }
+        updateBalance();
+    }
+    btnBuyammoreach.onclick = function () {
+        if (game.downEnemy >= 1000) {
+            game.downEnemy -= 1000;
+            game.ammoreach += 10;
         }
         updateBalance();
     }
