@@ -25,9 +25,10 @@ window.addEventListener('load', function () {
         ammo: "ammo",
         sheild: "sheild",
         repair: "repair",
+        trash: "trash"
     }
 
-    const badEnemyTypes = [EnemyType.nonlucky, EnemyType.blaster, EnemyType.hivewhale, EnemyType.drone, EnemyType.boss];
+    const badEnemyTypes = [EnemyType.trash, EnemyType.nonlucky, EnemyType.blaster, EnemyType.hivewhale, EnemyType.drone, EnemyType.boss];
 
     //classes
 
@@ -738,15 +739,25 @@ window.addEventListener('load', function () {
             }
         }
         shoot() {
+            const randomize = Math.random();
             if (!this.game.freeze) {
                 if (this.enemyshoottime <= 10 && this instanceof Angler2) {
                     this.enemyprojectiles.push(new EnemyProjectile(this.game, this.x + this.blastposx, this.y + this.blastposy));
                 }
                 if (this.frameX === 3 && this instanceof Boss) {
-                    this.enemyprojectiles.push(new EnemyProjectile(this.game, this.x + this.blastposx, this.y + this.blastposy));
+                    // this.enemyprojectiles.push(new EnemyProjectile(this.game, this.x + this.blastposx, this.y + this.blastposy));
                 }
                 if (this.misslefirerate === 40 && this instanceof Boss) {
-                    this.enemybomb.push(new enemyRocket(this.game, this.x + this.blastposx, this.y + this.blastposy));
+                    // this.enemybomb.push(new enemyRocket(this.game, this.x + this.blastposx, this.y + this.blastposy));
+                    if (randomize < 0.25) {
+                        this.game.enemies.push(new trash1(this.game, this.x, this.y))
+                    } else if (randomize < 0.50) {
+                        this.game.enemies.push(new trash2(this.game, this.x, this.y))
+                    } else if (randomize < 0.75) {
+                        this.game.enemies.push(new trash3(this.game, this.x, this.y))
+                    } else {
+                        this.game.enemies.push(new trash4(this.game, this.x, this.y))
+                    }
                     this.misslefirerate = 0;
                 }
             }
@@ -914,6 +925,93 @@ window.addEventListener('load', function () {
 
     }
 
+    class trash1 extends Enemy {
+        constructor(game, x, y) {
+            super(game);
+            this.width = 50;
+            this.height = 22;
+            this.x = x;
+            this.y = y;
+            this.image = document.getElementById('bottle1');
+            this.speedX = Math.random() * -20 - 10;
+            this.type = EnemyType.trash;
+            this.lives = 50;
+        }
+        draw(context) {
+            context.drawImage(this.image, this.x, this.y);
+            this.y += 0.2;
+            if (this.y > this.game.height) {
+                this.markedForDeletion = true;
+            }
+        }
+
+    }
+    class trash2 extends Enemy {
+        constructor(game, x, y) {
+            super(game);
+            this.width = 55;
+            this.height = 20;
+            this.x = x;
+            this.y = y;
+            this.image = document.getElementById('bottle2');
+            this.speedX = Math.random() * -20 - 10;
+            this.type = EnemyType.trash;
+            this.lives = 50;
+
+        }
+        draw(context) {
+            context.drawImage(this.image, this.x, this.y);
+            this.y += 0.2;
+            if (this.y > this.game.height) {
+                this.markedForDeletion = true;
+            }
+        }
+
+    }
+    class trash3 extends Enemy {
+        constructor(game, x, y) {
+            super(game);
+            this.width = 55;
+            this.height = 20;
+            this.x = x;
+            this.y = y;
+            this.image = document.getElementById('bottle3');
+            this.speedX = Math.random() * -20 - 10;
+            this.type = EnemyType.trash;
+            this.lives = 50;
+
+        }
+        draw(context) {
+            context.drawImage(this.image, this.x, this.y);
+            this.y += 0.2;
+            if (this.y > this.game.height) {
+                this.markedForDeletion = true;
+            }
+        }
+
+    }
+    class trash4 extends Enemy {
+        constructor(game, x, y) {
+            super(game);
+            this.width = 55;
+            this.height = 20;
+            this.x = x;
+            this.y = y;
+            this.image = document.getElementById('bottle4');
+            this.speedX = Math.random() * -20 - 10;
+            this.type = EnemyType.trash;
+            this.lives = 50;
+
+        }
+        draw(context) {
+            context.drawImage(this.image, this.x, this.y);
+            this.y += 0.2;
+            if (this.y > this.game.height) {
+                this.markedForDeletion = true;
+            }
+        }
+
+    }
     class Layer {
         constructor(game, image, speedModifier) {
             this.game = game;
@@ -1126,7 +1224,7 @@ window.addEventListener('load', function () {
             this.commanddown = false;
             this.armor = 1;
             this.firerate = 100;
-            this.ammoreach = 300;
+            this.ammoreach = 500;
         }
         update(deltaTime, context) {
             if (!this.gameOver) this.gameTime += deltaTime;
@@ -1317,7 +1415,9 @@ window.addEventListener('load', function () {
                             if (badEnemyTypes.includes(enemy.type)) {
                                 enemy.lives -= 5;
                                 bullet.markedForDeletion = true;
-                                enemy.x += enemy.speedX + 50;
+                                if (bullet.type !== 'electrify') {
+                                    enemy.x += enemy.speedX + 50;
+                                }
                                 if (bullet.type === 'electrify') {
                                     enemy.shocked = true;
                                 }
@@ -1358,7 +1458,7 @@ window.addEventListener('load', function () {
             else if (randomize < 0.5) this.enemies.push(new Ammo(this));
             else if (randomize < 0.6) this.enemies.push(new UltraSheild(this));
             else if (randomize < 0.7) this.enemies.push(new Fix(this));
-            else {
+            else if (randomize < 0.73) {
                 this.enemies.push(new Boss(this));
                 this.bossbattle = true;
                 this.bossbattlewarningtime = 0;
