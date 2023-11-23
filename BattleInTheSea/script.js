@@ -745,10 +745,10 @@ window.addEventListener('load', function () {
                     this.enemyprojectiles.push(new EnemyProjectile(this.game, this.x + this.blastposx, this.y + this.blastposy));
                 }
                 if (this.frameX === 3 && this instanceof Boss) {
-                    // this.enemyprojectiles.push(new EnemyProjectile(this.game, this.x + this.blastposx, this.y + this.blastposy));
+                    this.enemyprojectiles.push(new EnemyProjectile(this.game, this.x + this.blastposx, this.y + this.blastposy));
                 }
                 if (this.misslefirerate === 40 && this instanceof Boss) {
-                    // this.enemybomb.push(new enemyRocket(this.game, this.x + this.blastposx, this.y + this.blastposy));
+                    this.enemybomb.push(new enemyRocket(this.game, this.x + this.blastposx, this.y + this.blastposy));
                     if (randomize < 0.25) {
                         this.game.enemies.push(new trash1(this.game, this.x, this.y))
                     } else if (randomize < 0.50) {
