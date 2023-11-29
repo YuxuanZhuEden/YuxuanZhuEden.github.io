@@ -5,6 +5,7 @@ window.addEventListener('load', function () {
     canvas.height = 500;
     let game;
     let mouseX, mouseY;
+    let ishooting;
 
     const securityDiv = document.getElementById("security");
     const gameDiv = document.getElementById("gamePage");
@@ -94,7 +95,13 @@ window.addEventListener('load', function () {
             window.addEventListener("mousemove", (event) => {
                 mouseX = event.clientX;
                 mouseY = event.clientY;
-                console.log("mouse x", mouseX);
+            });
+            window.addEventListener("mousedown", (event) => {
+                ishooting = true;
+                console.log("mouse down x", mouseX);
+            });
+            window.addEventListener("mouseup", (event) => {
+                ishooting = false;
             });
         }
     }
@@ -284,6 +291,42 @@ window.addEventListener('load', function () {
             context.drawImage(this.image, this.x, this.y);
         }
     }
+    class spike {
+        constructor(game, x, y) {
+            this.game = game;
+            this.x = x;
+            this.y = y;
+            this.width = 95;
+            this.height = 49;
+            this.speedX = 20;
+            let moveY = 0;
+            const targetEnemy1 = this.game.enemies.find((enemy) =>
+                badEnemyTypes.includes(enemy.type) && (enemy.x > this.x) && (enemy.x < this.game.width)
+                && enemy.shocked === false
+            )
+            const targetEnemy2 = this.game.enemies.find((enemy) =>
+                badEnemyTypes.includes(enemy.type) && (enemy.x > this.x) && (enemy.x < this.game.width)
+            )
+            if (targetEnemy1) {
+                moveY = 20 * (targetEnemy1.y - this.y) / (targetEnemy1.x - this.x);
+            } else if (targetEnemy2) {
+                moveY = 20 * (targetEnemy2.y - this.y) / (targetEnemy2.x - this.x);
+            }
+            this.speedY = moveY;
+            this.markedForDeletion = false;
+            this.image = document.getElementById('spike');
+            this.imageDown = document.getElementById('spikeUp');
+            this.imageUp = document.getElementById('spikeDown');
+            this.type = 'spike';
+        }
+        update() {
+            this.x += this.speedX;
+            this.y += this.speedY;
+        }
+        draw(context) {
+            context.drawImage(this.image, this.x, this.y, this.width * 0.2, this.height * 0.2);
+        }
+    }
     class Player {
         constructor(game) {
             this.game = game;
@@ -313,7 +356,7 @@ window.addEventListener('load', function () {
             else this.speedy = 0;
             let heal = Math.random() * 200;
             const formattedheal = parseInt(heal);
-            if (this.game.keys.includes(' ') && this.game.shoottime >= this.game.firerate) {
+            if (ishooting && this.game.shoottime >= this.game.firerate) {
                 this.shootTop();
                 this.game.shoottime = 0;
             }
@@ -417,7 +460,7 @@ window.addEventListener('load', function () {
             this.y = y;
             this.frameX = 0;
             this.frameY = 0
-            this.maxFrame = 6;
+            this.maxFrame = 5;
             this.projectiles = [];
             this.bombs = [];
             this.image = document.getElementById('dolphin');
@@ -467,7 +510,7 @@ window.addEventListener('load', function () {
             this.y = y;
             this.frameX = 0;
             this.frameY = 0
-            this.maxFrame = 6;
+            this.maxFrame = 5;
             this.projectiles = [];
             this.bombs = [];
             if (this.firerate > 24) {
@@ -519,6 +562,65 @@ window.addEventListener('load', function () {
             this.projectiles = this.projectiles.filter(projectile => !projectile.markedForDeletion);
         }
     }
+    class pufferfish {
+        constructor(game, y) {
+            this.game = game;
+            this.width = 38;
+            this.height = 30;
+            this.x = 300;
+            this.y = y;
+            this.frameX = 0;
+            this.frameY = 0
+            this.maxFrame = 1;
+            this.projectiles = [];
+            this.bombs = [];
+            this.image = document.getElementById('pufferfish');
+            this.firerate = 0;
+            this.maxfirerate = 30;
+            this.markedForDeletion = false;
+            this.lives = 1000;
+            this.maxlives = 1000;
+            this.projectiles = [];
+            this.type = "pufferfish";
+            this.addframeX = 0;
+            this.maxaddframeX = 5000;
+        }
+        update() {
+            if (this.frameX < this.maxFrame) {
+                this.frameX++;
+            } else {
+                this.frameX = 0;
+            }
+            const targetEnemy2 = this.game.enemies.find((enemy) =>
+                badEnemyTypes.includes(enemy.type) && (enemy.x > this.x) && (enemy.x < this.game.width)
+            )
+            if (this.firerate < this.maxfirerate) {
+                this.firerate++;
+            } else if (targetEnemy2) {
+                this.firerate = 0;
+                this.projectiles.push(new spike(this.game, this.x, this.y));
+            }
+            if (this.y < this.game.player.y) {
+                this.y++;
+            } else {
+                this.y--;
+            }
+            this.projectiles.forEach(bolt => {
+                bolt.update();
+            })
+        }
+        draw(context) {
+            context.drawImage(this.image, this.frameX * this.width, this.frameY * this.height,
+                this.width, this.height, this.x, this.y, this.width * 3, this.height * 3);
+            let healthWidth = this.lives / 6;
+            let healthpos = this.x - (healthWidth - this.width) / 2;
+            context.fillRect(healthpos, this.y - 10, healthWidth, 10);
+            this.projectiles.forEach(bolt => {
+                bolt.draw(context);
+            })
+            this.projectiles = this.projectiles.filter(projectile => !projectile.markedForDeletion);
+        }
+    }
     class fish {
         constructor(game, y) {
             this.game = game;
@@ -528,7 +630,7 @@ window.addEventListener('load', function () {
             this.y = y;
             this.frameX = 0;
             this.frameY = 0
-            this.maxFrame = 2;
+            this.maxFrame = 1;
             this.projectiles = [];
             this.bombs = [];
             this.image = document.getElementById('fish');
@@ -585,7 +687,7 @@ window.addEventListener('load', function () {
             this.y = y;
             this.frameX = 0;
             this.frameY = 0
-            this.maxFrame = 6;
+            this.maxFrame = 5;
             this.projectiles = [];
             this.bombs = [];
             this.image = document.getElementById('turtle');
@@ -1299,7 +1401,7 @@ window.addEventListener('load', function () {
             if (hardnessLevel === "easy") {
                 this.lives = 1000;
                 this.maxlives = 1000;
-                this.helpers = [new fish(this, 0), new Turtle(this, 0), new eel(this, 0), new Helper(this, 300), new Dolphin(this, 300)];
+                this.helpers = [new pufferfish(this, 0), new fish(this, 0), new Turtle(this, 0), new eel(this, 0), new Helper(this, 300), new Dolphin(this, 300)];
             } else if (hardnessLevel === "hard") {
                 this.lives = 300;
                 this.maxlives = 300;
@@ -1535,16 +1637,22 @@ window.addEventListener('load', function () {
                     helper.projectiles.forEach(bullet => {
                         if (this.checkCollision(bullet, enemy)) {
                             if (badEnemyTypes.includes(enemy.type)) {
-                                enemy.lives -= 5;
-                                bullet.markedForDeletion = true;
                                 if (bullet.type === 'normal') {
                                     enemy.x += enemy.speedX + 50;
+                                    enemy.lives -= 5;
+                                    bullet.markedForDeletion = true;
                                 }
                                 if (bullet.type === 'electrify') {
                                     enemy.shocked = true;
+                                    bullet.markedForDeletion = true;
                                 }
                                 if (bullet.type === 'bubble') {
                                     enemy.trapped = true;
+                                    bullet.markedForDeletion = true;
+                                }
+                                if (bullet.type === 'spike') {
+                                    enemy.lives -= 5;
+                                    bullet.x = enemy.x + enemy.width;
                                 }
                             }
                         }
@@ -1824,6 +1932,13 @@ window.addEventListener('load', function () {
         if (game.downEnemy >= 20000) {
             game.downEnemy -= 20000;
             game.helpers.push(new fish(game, Math.random() * 400));
+        }
+        updateBalance();
+    }
+    btnBuypufferfish.onclick = function () {
+        if (game.downEnemy >= 15000) {
+            game.downEnemy -= 15000;
+            game.helpers.push(new pufferfish(game, Math.random() * 400));
         }
         updateBalance();
     }
