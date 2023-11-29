@@ -1448,6 +1448,7 @@ window.addEventListener('load', function () {
             this.armor = 1;
             this.firerate = 100;
             this.ammoreach = 500;
+            this.luck = 500;
         }
         update(deltaTime, context) {
             if (!this.gameOver) this.gameTime += deltaTime;
@@ -1580,7 +1581,7 @@ window.addEventListener('load', function () {
                             enemy.markedForDeletion = true;
                             if (enemy.type === EnemyType.boss) this.bossbattle = false;
                             this.evenharder += 0.001;
-                            this.downEnemy += 500;
+                            this.downEnemy += this.luck;
                             if (enemy.type === EnemyType.hivewhale) {
                                 for (let i = 0; i < 15; i++) {
                                     this.enemies.push(new Drone(this, enemy.x, Math.random() * this.height));
@@ -1685,16 +1686,26 @@ window.addEventListener('load', function () {
         addEnemy() {
             const randomize = Math.random();
             if (randomize < 0.1) this.enemies.push(new Angler1(this));
-            else if (randomize < 0.2) this.enemies.push(new Angler2(this));
-            else if (randomize < 0.3) this.enemies.push(new HiveWhale(this));
-            else if (randomize < 0.4) this.enemies.push(new Healing(this));
-            else if (randomize < 0.5) this.enemies.push(new Ammo(this));
-            else if (randomize < 0.6) this.enemies.push(new UltraSheild(this));
-            else if (randomize < 0.7) this.enemies.push(new Fix(this));
-            else if (randomize < 0.73) {
+            else if (randomize < 0.3) this.enemies.push(new Angler2(this));
+            else if (randomize < 0.5) this.enemies.push(new HiveWhale(this));
+            else if (randomize < 0.6) this.enemies.push(new Healing(this));
+            else if (randomize < 0.7) this.enemies.push(new Ammo(this));
+            else if (randomize < 0.8) this.enemies.push(new UltraSheild(this));
+            else if (randomize < 0.9) this.enemies.push(new Fix(this));
+            else if (randomize < 0.93) {
                 this.enemies.push(new Boss(this));
                 this.bossbattle = true;
                 this.bossbattlewarningtime = 0;
+            } else if (randomize < 0.94) {
+                this.enemies.push(new trash1(this));
+            } else if (randomize < 0.95) {
+                this.enemies.push(new trash2(this));
+            } else if (randomize < 0.96) {
+                this.enemies.push(new trash3(this));
+            } else if (randomize < 0.97) {
+                this.enemies.push(new trash4(this));
+            } else if (randomize < 0.98) {
+                this.enemies.push(new trash5(this));
             }
         }
         checkCollision(rect1, rect2) {
