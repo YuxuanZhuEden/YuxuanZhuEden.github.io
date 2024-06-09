@@ -749,7 +749,7 @@ window.addEventListener('load', function () {
             this.lives = 1000;
             this.maxlives = 1000;
             this.type = "seahorse";
-            // if (this.mode = 1) {
+            // if (this.mode === 1) {
             //     this.maxfirerate = 50;
             //     this.damage = 10;
             // } else {
@@ -1500,25 +1500,17 @@ window.addEventListener('load', function () {
                     else if (badEnemyTypes.includes(enemy.type) && !this.gameOver
                         && this.blocking === true) this.sheildhealth -= enemy.lives;
                     if (this.lives - enemy.lives < 0) this.lives = 0;
-                    if (enemy.type === EnemyType.heal && !this.gameOver && this.grabedhealing + 5 <= 30) {
-                        this.grabedhealing += 5;
+                    if (enemy.type === EnemyType.heal && !this.gameOver) {
+                        this.grabedhealing++;
                     }
-                    if (enemy.type === EnemyType.ammo && !this.gameOver && this.backupammo < 10) {
-                        this.backupammo += 3;
+                    if (enemy.type === EnemyType.ammo && !this.gameOver) {
+                        this.backupammo++;
                     }
-                    if (enemy.type === EnemyType.ammo && !this.gameOver && this.backupammo < 10) {
-                        this.backupammo = 10;
+                    if (enemy.type === EnemyType.sheild && !this.gameOver) {
+                        this.shields++;
                     }
-                    if (enemy.type === EnemyType.ammo && !this.gameOver && this.rocketammo < 20) {
-                        this.rocketammo += 3;
-                    } if (enemy.type === EnemyType.ammo && !this.gameOver && this.rocketammo > 20) {
-                        this.rocketammo = 20;
-                    }
-                    if (enemy.type === EnemyType.sheild && !this.gameOver && this.shields < 27) {
-                        this.shields += 2;
-                    }
-                    if (enemy.type === EnemyType.repair && !this.gameOver && this.repairkits < 27) {
-                        this.repairkits += 2;
+                    if (enemy.type === EnemyType.repair && !this.gameOver) {
+                        this.repairkits++;
                     }
                 }
                 if (!enemy.trapped) {
