@@ -28,6 +28,33 @@ window.addEventListener('keydown', (event) => {
             keys.shift.pressed = true
 
             break
+        case 'Escape':
+            if (!inventory) inventory = true
+            else inventory = false
+
+            break
+        case '2':
+            hotbar.item = hotbar.item2
+
+
+            break
+        case '1':
+            hotbar.item = hotbar.item1
+
+
+            break
+        // case 'b':
+        //     enemies.push(new Enemy(Math.random() * 1000, 0));
+
+        //     break
+        // case 'g':
+        //     helpers.push(new Helper(Math.random() * 1000, 0));
+
+        //     break
+        // case 'h':
+        //     player.HP += 100
+
+        //     break
     }
 })
 window.addEventListener('keyup', (event) => {
@@ -54,6 +81,10 @@ window.addEventListener('keyup', (event) => {
             keys.shift.pressed = false
 
             break
+        // case 'Escape':
+        //     keys.ESC.pressed = false
+
+        //     break
     }
 
 })

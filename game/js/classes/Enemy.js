@@ -47,7 +47,7 @@ class Enemy {
             } else if (this.mode === this.mode4) {
                 this.image = document.getElementById('Shoot')
                 if (this.frame === 2 && this.changeframe === 0) {
-                    projectiles.push(new Projectile(this.position.x + 86, this.position.y + 76, 25, "hostile"))
+                    projectiles.push(new Projectile(this.position.x + 86, this.position.y + 76, bulletspeed, "hostile"))
                 }
             }
         } else if (this.direction === this.directions2) {
@@ -56,7 +56,7 @@ class Enemy {
             } else if (this.mode === this.mode4) {
                 this.image = document.getElementById('Shootleft')
                 if (this.frame === 1 && this.changeframe === 0) {
-                    projectiles.push(new Projectile(this.position.x + 86, this.position.y + 76, -25, "hostile"))
+                    projectiles.push(new Projectile(this.position.x + 86, this.position.y + 76, -bulletspeed, "hostile"))
                 }
             }
         }

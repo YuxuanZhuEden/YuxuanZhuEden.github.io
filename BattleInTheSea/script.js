@@ -1501,16 +1501,16 @@ window.addEventListener('load', function () {
                         && this.blocking === true) this.sheildhealth -= enemy.lives;
                     if (this.lives - enemy.lives < 0) this.lives = 0;
                     if (enemy.type === EnemyType.heal && !this.gameOver) {
-                        this.grabedhealing++;
+                        this.grabedhealing += 5;
                     }
                     if (enemy.type === EnemyType.ammo && !this.gameOver) {
-                        this.backupammo++;
+                        this.backupammo += 5;
                     }
                     if (enemy.type === EnemyType.sheild && !this.gameOver) {
-                        this.shields++;
+                        this.shields += 5;
                     }
                     if (enemy.type === EnemyType.repair && !this.gameOver) {
-                        this.repairkits++;
+                        this.repairkits += 5;
                     }
                 }
                 if (!enemy.trapped) {

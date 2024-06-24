@@ -3,10 +3,11 @@ class Helper {
     constructor() {
         this.frame = 0
         this.direction = player.direction
-        this.number = Math.random() * 1000
+        this.number = Math.random() * 100
         this.position = {
-            x: 0,
-            y: 0,
+            x: player.position.x + 50 + this.number,
+            y: 0
+            ,
         }
 
         this.width = 128;
@@ -31,20 +32,16 @@ class Helper {
     update() {
         this.direction = player.direction
         this.mode = player.mode
-        if (this.direction === "right") {
-            this.position.x = player.position.x - 50 - this.number
-        } else if (this.direction === "left") {
-            this.position.x = player.position.x + 50 + this.number
-        }
+
         this.position.y = player.position.y
         if (this.mode === 'Shoot' && this.frame === 2 && this.changeframe === 0) {
-            projectiles.push(new Projectile(this.position.x + 86, this.position.y + 76, 25, "friendly"))
+            projectiles.push(new Projectile(this.position.x + 86, this.position.y + 76, bulletspeed, "friendly"))
         } else if (this.mode === 'Shootleft' && this.frame === 1 && this.changeframe === 0) {
-            projectiles.push(new Projectile(this.position.x + 40, this.position.y + 76, -25, "friendly"))
+            projectiles.push(new Projectile(this.position.x + 40, this.position.y + 76, -bulletspeed, "friendly"))
         } else if (this.mode === 'Shoot2' && this.frame === 3 && this.changeframe === 0) {
-            projectiles.push(new Projectile(this.position.x + 90, this.position.y + 87, 25, "friendly"))
+            projectiles.push(new Projectile(this.position.x + 90, this.position.y + 87, bulletspeed, "friendly"))
         } else if (this.mode === 'Shoot2left' && this.frame === 2 && this.changeframe === 0) {
-            projectiles.push(new Projectile(this.position.x + 36, this.position.y + 87, -25, "friendly"))
+            projectiles.push(new Projectile(this.position.x + 36, this.position.y + 87, -bulletspeed, "friendly"))
         }
         if (this.direction === "right") {
             if (this.mode === "Idle") {

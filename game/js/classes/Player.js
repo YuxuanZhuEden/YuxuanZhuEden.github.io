@@ -4,9 +4,9 @@ class Player {
         this.frame = 0
         this.directions1 = "left"
         this.directions2 = "right"
-        this.direction = this.directions2
+        this.direction = this.directions1
         this.position = {
-            x: 100,
+            x: 1300,
             y: 100,
         }
 
@@ -20,7 +20,7 @@ class Player {
             bottom: this.position.y + this.height
         }
         this.gravity = 1
-        this.HP = 500
+        this.HP = 1000
         this.mode = "Idle"
         this.changeframe = 0
         this.maxchangeframe = 5 - 1
@@ -34,17 +34,29 @@ class Player {
 
     }
     update() {
-        console.log(projectiles.length)
-        if (this.mode === 'Shoot' && this.frame === 2 && this.changeframe === 0) {
-            projectiles.push(new Projectile(this.position.x + 86, this.position.y + 76, 25, "friendly"))
-        } else if (this.mode === 'Shootleft' && this.frame === 1 && this.changeframe === 0) {
-            projectiles.push(new Projectile(this.position.x + 40, this.position.y + 76, -25, "friendly"))
-        } else if (this.mode === 'Shoot2' && this.frame === 3 && this.changeframe === 0) {
-            projectiles.push(new Projectile(this.position.x + 90, this.position.y + 87, 25, "friendly"))
-        } else if (this.mode === 'Shoot2left' && this.frame === 2 && this.changeframe === 0) {
-            projectiles.push(new Projectile(this.position.x + 36, this.position.y + 87, -25, "friendly"))
+        // console.log(projectiles.length)
+        // console.log(this.frame)
+        if (hotbar.item === hotbar.item1) {
+            if (this.mode === 'Shoot' && this.frame === 2 && this.changeframe === 0) {
+                projectiles.push(new Projectile(this.position.x + 86, this.position.y + 76, bulletspeed, "friendly"))
+            } else if (this.mode === 'Shootleft' && this.frame === 1 && this.changeframe === 0) {
+                projectiles.push(new Projectile(this.position.x + 40, this.position.y + 76, -bulletspeed, "friendly"))
+            } else if (this.mode === 'Shoot2' && this.frame === 3 && this.changeframe === 0) {
+                projectiles.push(new Projectile(this.position.x + 90, this.position.y + 87, bulletspeed, "friendly"))
+            } else if (this.mode === 'Shoot2left' && this.frame === 2 && this.changeframe === 0) {
+                projectiles.push(new Projectile(this.position.x + 36, this.position.y + 87, -bulletspeed, "friendly"))
+            }
+        } else if (hotbar.crateamount > 0 && keys.space.pressed === true && hotbar.item === hotbar.item2 && this.frame === 2 && this.changeframe === 0) {
+            if (this.direction === this.directions1) {
+                crates.push(new Crate(this.position.x - 50, this.sides.bottom - 50));
+            } else if (this.direction === this.directions2) {
+                crates.push(new Crate(this.position.x + this.width, this.position.y + this.height - 50));
+            }
+            hotbar.crateamount--
         }
-        this.HP += 0.5
+        if (this.HP < 1000) {
+            this.HP += 1
+        }
         if (this.direction === this.directions2) {
             this.mode1 = "Idle";
             this.mode2 = "Shoot";
@@ -52,10 +64,8 @@ class Player {
             this.mode4 = "Run";
             this.mode5 = "Shoot2";
             this.mode6 = "Kneel";
-            if (this.mode === this.mode1) {
-                this.maxframe = 6
-                this.image = document.getElementById('Idle')
-            } else if (this.mode === this.mode2) {
+            this.mode7 = "Throw";
+            if (this.mode === this.mode2 && hotbar.item === hotbar.item1) {
                 this.maxframe = 3
                 this.image = document.getElementById('Shoot')
             } else if (this.mode === this.mode3) {
@@ -64,12 +74,15 @@ class Player {
             } else if (this.mode === this.mode4) {
                 this.maxframe = 5
                 this.image = document.getElementById('Run')
-            } else if (this.mode === this.mode5) {
+            } else if (this.mode === this.mode5 && hotbar.item === hotbar.item1) {
                 this.maxframe = 3
                 this.image = document.getElementById('Shoot2')
-            } else {
+            } else if (this.mode === this.mode6 && hotbar.item === hotbar.item1) {
                 this.maxframe = 0
                 this.image = document.getElementById('Kneel')
+            } else {
+                this.maxframe = 6
+                this.image = document.getElementById('Idle')
             }
         }
         if (this.direction === this.directions1) {
@@ -79,10 +92,7 @@ class Player {
             this.mode4 = "Runleft";
             this.mode5 = "Shoot2left";
             this.mode6 = "Kneelleft";
-            if (this.mode === this.mode1) {
-                this.maxframe = 6
-                this.image = document.getElementById('Idleleft')
-            } else if (this.mode === this.mode2) {
+            if (this.mode === this.mode2 && hotbar.item === hotbar.item1) {
                 this.maxframe = 3
                 this.image = document.getElementById('Shootleft')
             } else if (this.mode === this.mode3) {
@@ -91,22 +101,39 @@ class Player {
             } else if (this.mode === this.mode4) {
                 this.maxframe = 5
                 this.image = document.getElementById('Runleft')
-            } else if (this.mode === this.mode5) {
+            } else if (this.mode === this.mode5 && hotbar.item === hotbar.item1) {
                 this.maxframe = 3
                 this.image = document.getElementById('Shoot2left')
-            } else if (this.mode === this.mode6) {
+            } else if (this.mode === this.mode6 && hotbar.item === hotbar.item1) {
                 this.maxframe = 0
                 this.image = document.getElementById('Kneelleft')
+            } else {
+                this.maxframe = 6
+                this.image = document.getElementById('Idleleft')
             }
         }
         this.position.x += this.velocity.x
         this.position.y += this.velocity.y
+        crates.forEach(crate => {
+            if (checkCollision(crate, this)) {
+                this.position.y = crate.position.y - this.height
+                this.velocity.y = 0
+            }
+        })
         if (this.mode === this.mode2 || this.mode === this.mode5) this.velocity.x = 0
         if (this.changeframe >= this.maxchangeframe) {
-            if (this.frame < this.maxframe) {
-                this.frame++
-            } else {
-                this.frame = 0
+            if (this.direction === this.directions2) {
+                if (this.frame < this.maxframe) {
+                    this.frame++
+                } else {
+                    this.frame = 0
+                }
+            } else if (this.direction === this.directions1) {
+                if (this.frame > 0) {
+                    this.frame--
+                } else {
+                    this.frame = this.maxframe
+                }
             }
             this.changeframe = 0
         } else {
@@ -126,3 +153,4 @@ class Player {
     }
 
 }
+
