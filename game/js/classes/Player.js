@@ -1,10 +1,17 @@
 //player
 class Player {
     constructor() {
+        this.onCrate = false;
         this.frame = 0
         this.directions1 = "left"
         this.directions2 = "right"
         this.direction = this.directions1
+        this.maxreload = 50
+        this.reload = 0
+        this.jumped = 0
+        this.maxjump = 2
+        this.jumpheight = -15
+        this.isjumping = false
         this.position = {
             x: 1300,
             y: 100,
@@ -20,7 +27,8 @@ class Player {
             bottom: this.position.y + this.height
         }
         this.gravity = 1
-        this.HP = 1000
+        this.HP = 500
+        this.maxHP = 500
         this.mode = "Idle"
         this.changeframe = 0
         this.maxchangeframe = 5 - 1
@@ -34,17 +42,19 @@ class Player {
 
     }
     update() {
-        // console.log(projectiles.length)
-        // console.log(this.frame)
         if (hotbar.item === hotbar.item1) {
             if (this.mode === 'Shoot' && this.frame === 2 && this.changeframe === 0) {
                 projectiles.push(new Projectile(this.position.x + 86, this.position.y + 76, bulletspeed, "friendly"))
+                this.reload = 0
             } else if (this.mode === 'Shootleft' && this.frame === 1 && this.changeframe === 0) {
                 projectiles.push(new Projectile(this.position.x + 40, this.position.y + 76, -bulletspeed, "friendly"))
+                this.reload = 0
             } else if (this.mode === 'Shoot2' && this.frame === 3 && this.changeframe === 0) {
                 projectiles.push(new Projectile(this.position.x + 90, this.position.y + 87, bulletspeed, "friendly"))
+                this.reload = 0
             } else if (this.mode === 'Shoot2left' && this.frame === 2 && this.changeframe === 0) {
                 projectiles.push(new Projectile(this.position.x + 36, this.position.y + 87, -bulletspeed, "friendly"))
+                this.reload = 0
             }
         } else if (hotbar.crateamount > 0 && keys.space.pressed === true && hotbar.item === hotbar.item2 && this.frame === 2 && this.changeframe === 0) {
             if (this.direction === this.directions1) {
@@ -54,8 +64,8 @@ class Player {
             }
             hotbar.crateamount--
         }
-        if (this.HP < 1000) {
-            this.HP += 1
+        if (this.HP < this.maxHP) {
+            this.HP += 0.2
         }
         if (this.direction === this.directions2) {
             this.mode1 = "Idle";
@@ -112,14 +122,6 @@ class Player {
                 this.image = document.getElementById('Idleleft')
             }
         }
-        this.position.x += this.velocity.x
-        this.position.y += this.velocity.y
-        crates.forEach(crate => {
-            if (checkCollision(crate, this)) {
-                this.position.y = crate.position.y - this.height
-                this.velocity.y = 0
-            }
-        })
         if (this.mode === this.mode2 || this.mode === this.mode5) this.velocity.x = 0
         if (this.changeframe >= this.maxchangeframe) {
             if (this.direction === this.directions2) {
@@ -139,15 +141,42 @@ class Player {
         } else {
             this.changeframe++
         }
+        console.log(this.jumped);
+        if (this.reload < this.maxreload) {
+            this.reload++
+        }
+        this.onCrate = false; 
+        crates.forEach(crate => {
+            if (crate.position.x < this.position.x + this.width &&
+                crate.position.x + crate.width > this.position.x &&
+                crate.position.y <= this.position.y + this.height + 10 && 
+                crate.position.y >= this.position.y + this.height - 10 && this.isjumping === false) {
+                this.position.y = crate.position.y - this.height
+                this.onCrate = true;
+                this.jumped = this.maxjump
+            }
+        })
+        this.isjumping = false
+        if (keys.uparrow.pressed === true && this.velocity.y === 0 && this.jumped > 0) {
+            this.velocity.y = this.jumpheight 
+            this.isjumping = true
+            this.jumped--
+        }
         if (this.position.y + this.height >= canvas.height && this.velocity.y > 0) {
             this.velocity.y = 0;
             this.position.y = canvas.height - this.height;
         } else if (this.position.y + this.height === canvas.height && this.velocity.y === 0) {
+            // on floor
             this.position.y = canvas.height - this.height;
+            this.jumped = this.maxjump
+        } else if (this.onCrate && this.isjumping === false) {
+            this.velocity.y = 0;
         } else {
             this.velocity.y += this.gravity
         }
         this.sides.bottom = this.position.y + this.height;
+        this.position.x += this.velocity.x
+        this.position.y += this.velocity.y
         // console.log(this.mode)
 
     }

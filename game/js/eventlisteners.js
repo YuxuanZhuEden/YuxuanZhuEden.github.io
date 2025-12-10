@@ -3,8 +3,7 @@ window.addEventListener('keydown', (event) => {
     switch (event.key) {
         //up
         case 'ArrowUp':
-            if (player.velocity.y === 0) player.velocity.y = -20
-
+            keys.uparrow.pressed = true
             break
         //left
         case 'ArrowLeft':
@@ -59,7 +58,12 @@ window.addEventListener('keydown', (event) => {
 })
 window.addEventListener('keyup', (event) => {
     switch (event.key) {
-        //left
+        //up
+        case 'ArrowUp':
+            keys.uparrow.pressed = false
+
+            break
+            //left
         case 'ArrowLeft':
             keys.leftarrow.pressed = false
 

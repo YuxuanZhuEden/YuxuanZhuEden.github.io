@@ -19,9 +19,9 @@ class Projectile {
         this.position.x += this.speed
         this.position.y += this.fall
         if (this.type === "friendly") {
-            this.fall += 0.1
+            this.fall += 0.05
         } else if (this.type === "hostile") {
-            this.fall += 0.2
+            this.fall += 0.1
         }
         crates.forEach(crate => {
             if (checkCollision(crate, this)) {
@@ -41,7 +41,7 @@ class Projectile {
 
         } else if (this.type === "hostile") {
             if (checkCollision(player, this)) {
-                player.HP -= 100 / 3
+                player.HP -= 20
                 this.markedForDeletion = true
             }
             helpers.forEach(helper => {

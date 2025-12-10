@@ -68,7 +68,6 @@ function animate() {
     // console.log("round", round)
     // console.log("loading=", loadingnextround)
     // console.log("nextround=", nextround)
-    console.log(player.position.y)
     if (!inventory) {
 
         c.fillStyle = 'white'
@@ -107,19 +106,19 @@ function animate() {
             // helpers.push(new Helper(Math.random() * 100, 0));
         }
 
-        if (keys.space.pressed === true && keys.downarrow.pressed === true) {
+        if (keys.space.pressed === true && keys.downarrow.pressed === true && player.reload === player.maxreload) {
             player.mode = player.mode5
-        } else if (keys.space.pressed === true && keys.downarrow.pressed === false) {
+        } else if (keys.space.pressed === true && keys.downarrow.pressed === false && player.reload === player.maxreload) {
             player.mode = player.mode2
         } else if (keys.downarrow.pressed === true) {
             player.mode = player.mode6
         }
         //sprinting left and right
         else if (keys.rightarrow.pressed && keys.shift.pressed) {
-            player.velocity.x = 10
+            player.velocity.x = 8
             player.mode = player.mode4
         } else if (keys.leftarrow.pressed && keys.shift.pressed) {
-            player.velocity.x = -10
+            player.velocity.x = -8
             player.mode = player.mode4
         } // moveing left and right
         else if (keys.rightarrow.pressed) {
