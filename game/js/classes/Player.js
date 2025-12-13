@@ -1,16 +1,18 @@
 //player
 class Player {
     constructor() {
+        this.sprintspeed = 10
+        this.walkspeed = 4
         this.onCrate = false;
         this.frame = 0
         this.directions1 = "left"
         this.directions2 = "right"
         this.direction = this.directions1
-        this.maxreload = 50
-        this.reload = 0
+        // this.maxreload = 50
+        // this.reload = 0
         this.jumped = 0
         this.maxjump = 2
-        this.jumpheight = -15
+        this.jumpheight = -20
         this.isjumping = false
         this.position = {
             x: 1300,
@@ -27,8 +29,9 @@ class Player {
             bottom: this.position.y + this.height
         }
         this.gravity = 1
-        this.HP = 500
-        this.maxHP = 500
+        this.HP = 1000
+        this.maxHP = 1000
+        this.healspeed = 1
         this.mode = "Idle"
         this.changeframe = 0
         this.maxchangeframe = 5 - 1
@@ -45,16 +48,16 @@ class Player {
         if (hotbar.item === hotbar.item1) {
             if (this.mode === 'Shoot' && this.frame === 2 && this.changeframe === 0) {
                 projectiles.push(new Projectile(this.position.x + 86, this.position.y + 76, bulletspeed, "friendly"))
-                this.reload = 0
+                // this.reload = 0
             } else if (this.mode === 'Shootleft' && this.frame === 1 && this.changeframe === 0) {
                 projectiles.push(new Projectile(this.position.x + 40, this.position.y + 76, -bulletspeed, "friendly"))
-                this.reload = 0
+                // this.reload = 0
             } else if (this.mode === 'Shoot2' && this.frame === 3 && this.changeframe === 0) {
                 projectiles.push(new Projectile(this.position.x + 90, this.position.y + 87, bulletspeed, "friendly"))
-                this.reload = 0
+                // this.reload = 0
             } else if (this.mode === 'Shoot2left' && this.frame === 2 && this.changeframe === 0) {
                 projectiles.push(new Projectile(this.position.x + 36, this.position.y + 87, -bulletspeed, "friendly"))
-                this.reload = 0
+                // this.reload = 0
             }
         } else if (hotbar.crateamount > 0 && keys.space.pressed === true && hotbar.item === hotbar.item2 && this.frame === 2 && this.changeframe === 0) {
             if (this.direction === this.directions1) {
@@ -65,7 +68,7 @@ class Player {
             hotbar.crateamount--
         }
         if (this.HP < this.maxHP) {
-            this.HP += 0.2
+            this.HP += this.healspeed
         }
         if (this.direction === this.directions2) {
             this.mode1 = "Idle";
@@ -140,11 +143,9 @@ class Player {
             this.changeframe = 0
         } else {
             this.changeframe++
-        }
-        console.log(this.jumped);
-        if (this.reload < this.maxreload) {
-            this.reload++
-        }
+        }        // if (this.reload < this.maxreload) {
+        //     this.reload++
+        // }
         this.onCrate = false; 
         crates.forEach(crate => {
             if (crate.position.x < this.position.x + this.width &&

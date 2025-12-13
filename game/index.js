@@ -2,8 +2,8 @@
 const canvas = document.querySelector('canvas')
 const c = canvas.getContext('2d')
 
-canvas.width = 1500
-canvas.height = 900
+canvas.width = 2000
+canvas.height = 1000
 const maxnextround = 500
 var nextround = 0
 var loadingnextround = false
@@ -12,6 +12,7 @@ const player = new Player()
 const hotbar = new Hotbar()
 const bulletspeed = 25
 const grenadespeed = 5
+let gameover = false
 var round = 1
 var projectiles = []
 var enemies = [];
@@ -63,7 +64,9 @@ const keys = {
     }
 }
 function animate() {
+    // if (gameover === false) {
     window.requestAnimationFrame(animate)
+// }
     // console.log(enemies.length)
     // console.log("round", round)
     // console.log("loading=", loadingnextround)
@@ -79,6 +82,9 @@ function animate() {
     // crates.forEach(crate => {
     //     console.log(crate.position.x, crate.position.y)
     // });
+    if (player.HP <= 0) {
+        gameover = true
+    }
     hotbar.draw()
     if (!inventory) {
         if (enemies.length === 0) {
@@ -94,9 +100,9 @@ function animate() {
         if (nextround >= maxnextround) {
             round++
             nextround = 0
-            hotbar.crateamount += 5
+            hotbar.crateamount += 10
             loadingnextround = false
-            for (let i = 0; i < round * 5; i++) {
+            for (let i = 0; i < round * 10; i++) {
                 enemies.push(new Enemy(Math.random() * 800, 0));
             }
             // helpers.push(new Helper(Math.random() * 100, 0));
@@ -115,17 +121,17 @@ function animate() {
         }
         //sprinting left and right
         else if (keys.rightarrow.pressed && keys.shift.pressed) {
-            player.velocity.x = 8
+            player.velocity.x = player.sprintspeed
             player.mode = player.mode4
         } else if (keys.leftarrow.pressed && keys.shift.pressed) {
-            player.velocity.x = -8
+            player.velocity.x = -player.sprintspeed
             player.mode = player.mode4
         } // moveing left and right
         else if (keys.rightarrow.pressed) {
-            player.velocity.x = 3.5
+            player.velocity.x = player.walkspeed
             player.mode = player.mode3
         } else if (keys.leftarrow.pressed) {
-            player.velocity.x = -3.5
+            player.velocity.x = -player.walkspeed
             player.mode = player.mode3
         } else {
             player.mode = player.mode1
@@ -157,5 +163,4 @@ function animate() {
         crates = crates.filter(crate => !crate.markedForDeletion)
     }
 }
-
-animate()
+    animate()
