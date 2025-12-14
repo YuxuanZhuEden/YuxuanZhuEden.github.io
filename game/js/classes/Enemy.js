@@ -5,11 +5,13 @@ class Enemy {
         this.directions1 = "left"
         this.directions2 = "right"
         this.jumped = 0
-        this.maxjump = 1
-        this.jumpheight = -20
+        this.maxjump = 2
+        this.walkspeed = 2.5
+        this.sprintspeed = 7.5
+        this.jumpheight = -17.5
         this.isjumping = false
         this.direction = this.directions1
-        this.sprintlength = 200
+        this.sprintrange = 200
         this.position = {
             x: x,
             y: y,
@@ -36,10 +38,13 @@ class Enemy {
         this.maxchangeframe = 5 - 1
         this.image = document.getElementById('Idle')
         this.markedForDeletion = false
-        this.walkspeed = 3
-        this.sprintspeed = 8
         this.gunpoint = this.position.y + 76
         this.onCrate = false;
+        this.shootchance = 0.1
+        this.walkchance = 0.1
+        this.sprintchance = 0.1
+        this.jumpchance = 0.75
+
     }
     draw() {
         c.drawImage(this.image, this.frame * this.width, 0, this.width, this.height, this.position.x, this.position.y, this.width, this.height)
@@ -49,7 +54,9 @@ class Enemy {
     }
     update() {
         this.isjumping = false
+        this.onCrate = false
         this.gunpoint = this.position.y + 76
+        //jumping on crates
         crates.forEach(crate => {
             if (crate.position.x < this.position.x + this.width &&
                 crate.position.x + crate.width > this.position.x &&
@@ -60,6 +67,7 @@ class Enemy {
                 this.jumped = this.maxjump
             }
         })
+        //switch image and shooting
         if (this.direction === this.directions1) {
             if (this.mode === this.mode1) {
                 this.image = document.getElementById('Idle')
@@ -87,6 +95,7 @@ class Enemy {
                 }
             }
         }
+        //change frame
         if (this.changeframe >= this.maxchangeframe) {
             if (this.frame < this.maxframe) {
                 this.frame++
@@ -97,39 +106,42 @@ class Enemy {
         } else {
             this.changeframe++
         }
-        if (this.gunpoint > player.position.y && this.gunpoint < player.position.y + player.height) {
+        //mode changeing
+        if (this.gunpoint > player.position.y && this.gunpoint < player.position.y + player.height && Math.random() <= this.shootchance) {
             this.mode = this.mode4
             this.velocity.x = 0
             this.maxframe = 3
-        } else if (player.position.x - this.sprintlength > this.position.x) {
+        } else if (player.position.x - this.sprintrange > this.position.x && Math.random() <= this.sprintchance) {
             this.direction = this.directions1
             this.velocity.x = this.sprintspeed
             this.mode = this.mode3
-        } else if (player.position.x + this.sprintlength < this.position.x) {
+        } else if (player.position.x + this.sprintrange < this.position.x && Math.random() <= this.sprintchance) {
             this.direction = this.directions2
             this.velocity.x = -this.sprintspeed
             this.mode = this.mode3
-        } else if (player.position.x > this.position.x) {
+        } else if (player.position.x > this.position.x && Math.random() <= this.walkchance) {
             this.direction = this.directions1
             this.velocity.x = this.walkspeed
             this.mode = this.mode2
-        } else if (player.position.x < this.position.x) {
+        } else if (player.position.x < this.position.x && Math.random() <= this.walkchance) {
             this.direction = this.directions2
             this.velocity.x = -this.walkspeed
             this.mode = this.mode2
-        } else {
-            this.velocity.x = 0
-            this.mode = this.mode1
-            this.maxframe = 6
-        }
+        } 
+        // else {
+        //     this.velocity.x = 0
+        //     this.mode = this.mode1
+        //     this.maxframe = 6
+        // }
         
-        if ((this.gunpoint < player.position.y || this.gunpoint > player.position.y + player.height) && this.jumped > 0) {
+        // jumping
+        if ((this.gunpoint > player.position.y + player.height) && this.jumped > 0 && Math.abs(this.velocity.y) <= 1 && Math.random() <= this.jumpchance) {
             this.velocity.y = this.jumpheight
             this.isjumping = true
             this.jumped--
-            console.log("isjumping", this.isjumping);
         }
-        
+
+        //landing
         if (this.position.y + this.height >= canvas.height && this.isjumping === false) {
             this.position.y = canvas.height - this.height;
             this.velocity.y = 0;
@@ -139,12 +151,14 @@ class Enemy {
         } else {
             this.velocity.y += this.gravity
         }
+
         this.position.x += this.velocity.x
         this.position.y += this.velocity.y
         this.sides.bottom = this.position.y + this.height;
-        // console.log(this.mode)
+        //delete when dead
         if (this.HP <= 0) {
             this.markedForDeletion = true
+            hotbar.crateamount += 1
         }
         
     }

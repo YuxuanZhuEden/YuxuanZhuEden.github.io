@@ -102,7 +102,7 @@ function animate() {
             nextround = 0
             hotbar.crateamount += 10
             loadingnextround = false
-            for (let i = 0; i < round * 10; i++) {
+            for (let i = 0; i < round * 5; i++) {
                 enemies.push(new Enemy(Math.random() * 800, 0));
             }
             // helpers.push(new Helper(Math.random() * 100, 0));
