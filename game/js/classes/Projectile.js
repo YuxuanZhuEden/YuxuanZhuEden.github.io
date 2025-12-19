@@ -40,7 +40,7 @@ class Projectile {
             })
 
         } else if (this.type === "hostile") {
-            if (checkCollision(player, this)) {
+            if (checkCollision(player, this) && player.mode !== player.mode7 && player.mode !== player.mode8) {
                 player.HP -= 20
                 this.markedForDeletion = true
             }

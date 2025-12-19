@@ -107,7 +107,7 @@ class Enemy {
             this.changeframe++
         }
         //mode changeing
-        if (this.gunpoint > player.position.y && this.gunpoint < player.position.y + player.height && Math.random() <= this.shootchance) {
+        if (this.gunpoint > player.position.y && this.gunpoint < player.position.y + player.height && Math.random() <= this.shootchance && player.mode !== player.mode7 && player.mode !== player.mode8) {
             this.mode = this.mode4
             this.velocity.x = 0
             this.maxframe = 3

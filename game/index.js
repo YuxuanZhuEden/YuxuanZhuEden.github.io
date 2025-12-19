@@ -64,13 +64,7 @@ const keys = {
     }
 }
 function animate() {
-    // if (gameover === false) {
     window.requestAnimationFrame(animate)
-// }
-    // console.log(enemies.length)
-    // console.log("round", round)
-    // console.log("loading=", loadingnextround)
-    // console.log("nextround=", nextround)
     if (!inventory) {
 
         c.fillStyle = 'white'
@@ -79,13 +73,17 @@ function animate() {
         c.drawImage(document.getElementById('inventory'), 200, 0, 176 * 6.11, canvas.height)
 
     }
-    // crates.forEach(crate => {
-    //     console.log(crate.position.x, crate.position.y)
-    // });
-    if (player.HP <= 0) {
-        gameover = true
-    }
+
+    c.fillStyle = 'black'
+    c.fillRect(57, 4, player.maxHP + 5, 30)
+    c.fillStyle = 'pink'
+    c.fillRect(60, 7, player.maxHP, 25)
+    c.fillStyle = 'red'
+    c.fillRect(60, 7, player.HP, 25)
+    c.font = "30px serif"
+    c.fillText("HP", 10, 30)
     hotbar.draw()
+
     if (!inventory) {
         if (enemies.length === 0) {
             loadingnextround = true
@@ -111,34 +109,39 @@ function animate() {
             // helpers.push(new Helper(Math.random() * 100, 0));
             // helpers.push(new Helper(Math.random() * 100, 0));
         }
-
-        if (keys.space.pressed === true && keys.downarrow.pressed === true && player.reload === player.maxreload) {
-            player.mode = player.mode5
-        } else if (keys.space.pressed === true && keys.downarrow.pressed === false && player.reload === player.maxreload) {
-            player.mode = player.mode2
-        } else if (keys.downarrow.pressed === true) {
-            player.mode = player.mode6
+        if (player.mode !== player.mode7 && player.mode !== player.mode8) {
+            if (keys.space.pressed === true && keys.downarrow.pressed === true && player.reload === player.maxreload) {
+                player.mode = player.mode5
+            } else if (keys.space.pressed === true && keys.downarrow.pressed === false && player.reload === player.maxreload) {
+                player.mode = player.mode2
+            } else if (keys.downarrow.pressed === true) {
+                player.mode = player.mode6
+            }
+            //sprinting left and right
+            else if (keys.rightarrow.pressed && keys.shift.pressed) {
+                player.velocity.x = player.sprintspeed
+                player.direction = player.directions2
+                player.mode = player.mode4
+            } else if (keys.leftarrow.pressed && keys.shift.pressed) {
+                player.velocity.x = -player.sprintspeed
+                player.direction = player.directions1
+                player.mode = player.mode4
+            } // moveing left and right
+            else if (keys.rightarrow.pressed) {
+                player.velocity.x = player.walkspeed
+                player.direction = player.directions2
+                player.mode = player.mode3
+            } else if (keys.leftarrow.pressed) {
+                player.velocity.x = -player.walkspeed
+                player.direction = player.directions1
+                player.mode = player.mode3
+            } else {
+                player.mode = player.mode1
+                player.velocity.x = 0
+            }
         }
-        //sprinting left and right
-        else if (keys.rightarrow.pressed && keys.shift.pressed) {
-            player.velocity.x = player.sprintspeed
-            player.mode = player.mode4
-        } else if (keys.leftarrow.pressed && keys.shift.pressed) {
-            player.velocity.x = -player.sprintspeed
-            player.mode = player.mode4
-        } // moveing left and right
-        else if (keys.rightarrow.pressed) {
-            player.velocity.x = player.walkspeed
-            player.mode = player.mode3
-        } else if (keys.leftarrow.pressed) {
-            player.velocity.x = -player.walkspeed
-            player.mode = player.mode3
-        } else {
-            player.mode = player.mode1
-            player.velocity.x = 0
-        }
-        player.update()
-        player.draw()
+            player.update()
+            player.draw()
 
         projectiles.forEach(projectile => {
             projectile.draw();

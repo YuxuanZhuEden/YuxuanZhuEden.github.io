@@ -8,12 +8,10 @@ window.addEventListener('keydown', (event) => {
         //left
         case 'ArrowLeft':
             keys.leftarrow.pressed = true
-            player.direction = player.directions1
             break
         //right
         case 'ArrowRight':
             keys.rightarrow.pressed = true
-            player.direction = player.directions2
             break
         case 'ArrowDown':
             keys.downarrow.pressed = true
