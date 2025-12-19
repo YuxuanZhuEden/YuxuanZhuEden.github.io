@@ -63,13 +63,13 @@ class Player {
         }
         if (hotbar.item === hotbar.item1) {
             if (this.mode === 'Shoot' && this.frame === 2 && this.changeframe === 0) {
-                projectiles.push(new Projectile(this.position.x + 86, this.position.y + 76, bulletspeed, "friendly"))
+                projectiles.push(new Projectile(this.position.x + 86, this.position.y + 76, -bulletspeed, "friendly"))
             } else if (this.mode === 'Shootleft' && this.frame === 1 && this.changeframe === 0) {
-                projectiles.push(new Projectile(this.position.x + 40, this.position.y + 76, -bulletspeed, "friendly"))
+                projectiles.push(new Projectile(this.position.x + 40, this.position.y + 76, bulletspeed, "friendly"))
             } else if (this.mode === 'Shoot2' && this.frame === 3 && this.changeframe === 0) {
-                projectiles.push(new Projectile(this.position.x + 90, this.position.y + 87, bulletspeed, "friendly"))
+                projectiles.push(new Projectile(this.position.x + 90, this.position.y + 87, -bulletspeed, "friendly"))
             } else if (this.mode === 'Shoot2left' && this.frame === 2 && this.changeframe === 0) {
-                projectiles.push(new Projectile(this.position.x + 36, this.position.y + 87, -bulletspeed, "friendly"))
+                projectiles.push(new Projectile(this.position.x + 36, this.position.y + 87, bulletspeed, "friendly"))
             }
         } else if (hotbar.crateamount > 0 && keys.space.pressed === true && hotbar.item === hotbar.item2 && this.frame === 2 && this.changeframe === 0) {
             if (this.direction === this.directions1) {
