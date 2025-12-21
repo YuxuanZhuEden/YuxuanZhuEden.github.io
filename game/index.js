@@ -2,8 +2,8 @@
 const canvas = document.querySelector('canvas')
 const c = canvas.getContext('2d')
 
-canvas.width = 2000
-canvas.height = 1000
+canvas.width = 1500
+canvas.height = 800
 const maxnextround = 500
 var nextround = 0
 var loadingnextround = false
@@ -16,9 +16,6 @@ let gameover = false
 var round = 1
 var projectiles = []
 var enemies = [];
-enemies.push(new Enemy(Math.random() * 1000, 0));
-enemies.push(new Enemy(Math.random() * 1000, 0));
-enemies.push(new Enemy(Math.random() * 1000, 0));
 enemies.push(new Enemy(Math.random() * 1000, 0));
 enemies.push(new Enemy(Math.random() * 1000, 0));
 var helpers = [];
@@ -100,7 +97,7 @@ function animate() {
             nextround = 0
             hotbar.crateamount += 10
             loadingnextround = false
-            for (let i = 0; i < round * 5; i++) {
+            for (let i = 0; i < round * 2; i++) {
                 enemies.push(new Enemy(Math.random() * 800, 0));
             }
             // helpers.push(new Helper(Math.random() * 100, 0));

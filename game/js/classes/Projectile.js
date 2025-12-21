@@ -11,6 +11,7 @@ class Projectile {
         this.type = type
         this.markedForDeletion = false
         this.fall = -Math.random() - 1
+        this.damage = 20
     }
     draw() {
         c.drawImage(this.image, this.position.x, this.position.y, this.width, this.height)
@@ -26,7 +27,7 @@ class Projectile {
         crates.forEach(crate => {
             if (checkCollision(crate, this)) {
                 if (this.type === "hostile") {
-                    crate.HP -= 10
+                    crate.HP -= this.damage 
                     this.markedForDeletion = true
                 }
             }
@@ -34,19 +35,19 @@ class Projectile {
         if (this.type === "friendly") {
             enemies.forEach(enemy => {
                 if (checkCollision(enemy, this)) {
-                    enemy.HP -= 100
+                    enemy.HP -= this.damage
                     this.markedForDeletion = true
                 }
             })
 
         } else if (this.type === "hostile") {
             if (checkCollision(player, this) && player.mode !== player.mode7 && player.mode !== player.mode8) {
-                player.HP -= 20
+                player.HP -= this.damage
                 this.markedForDeletion = true
             }
             helpers.forEach(helper => {
                 if (checkCollision(helper, this)) {
-                    helper.HP -= 100 / 3
+                    helper.HP -= this.damage
                     this.markedForDeletion = true
                 }
             })

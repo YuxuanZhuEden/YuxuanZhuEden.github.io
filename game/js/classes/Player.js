@@ -29,7 +29,7 @@ class Player {
             bottom: this.position.y + this.height
         }
         this.gravity = 1
-        this.maxHP = 500
+        this.maxHP = 1000
         this.HP = this.maxHP
         this.healspeed = 0.1
         this.mode = "Idle"
@@ -63,13 +63,18 @@ class Player {
         }
         if (hotbar.item === hotbar.item1) {
             if (this.mode === 'Shoot' && this.frame === 2 && this.changeframe === 0) {
-                projectiles.push(new Projectile(this.position.x + 86, this.position.y + 76, -bulletspeed, "friendly"))
-            } else if (this.mode === 'Shootleft' && this.frame === 1 && this.changeframe === 0) {
-                projectiles.push(new Projectile(this.position.x + 40, this.position.y + 76, bulletspeed, "friendly"))
+                if (this.direction === this.directions1) {
+                    projectiles.push(new Projectile(this.position.x + 86, this.position.y + 76, -bulletspeed, "friendly"))
+
+                } else if (this.direction === this.directions2) {
+                    projectiles.push(new Projectile(this.position.x + 40, this.position.y + 76, bulletspeed, "friendly"))  
+                }
             } else if (this.mode === 'Shoot2' && this.frame === 3 && this.changeframe === 0) {
-                projectiles.push(new Projectile(this.position.x + 90, this.position.y + 87, -bulletspeed, "friendly"))
-            } else if (this.mode === 'Shoot2left' && this.frame === 2 && this.changeframe === 0) {
-                projectiles.push(new Projectile(this.position.x + 36, this.position.y + 87, bulletspeed, "friendly"))
+                if (this.direction === this.directions1) {
+                    projectiles.push(new Projectile(this.position.x + 90, this.position.y + 87, -bulletspeed, "friendly"))
+                } else if (this.direction === this.directions2) {
+                    projectiles.push(new Projectile(this.position.x + 36, this.position.y + 87, bulletspeed, "friendly"))   
+                }
             }
         } else if (hotbar.crateamount > 0 && keys.space.pressed === true && hotbar.item === hotbar.item2 && this.frame === 2 && this.changeframe === 0) {
             if (this.direction === this.directions1) {
@@ -189,10 +194,10 @@ class Player {
         } else {
             this.velocity.y += this.gravity
         }
-        if (this.mode === this.mode2 || this.mode === this.mode5 || this.mode === this.mode7) {
+        if (this.mode === this.mode2 || this.mode === this.mode5 || this.mode === this.mode7 || this.mode === this.mode8) {
             this.velocity.x = 0
         } 
-        if (this.mode === this.mode7) {
+        if (this.mode === this.mode7 || this.mode === this.mode8) {
             this.velocity.y = 0
         }
         this.sides.bottom = this.position.y + this.height;
