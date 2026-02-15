@@ -25,11 +25,7 @@ window.addEventListener('keydown', (event) => {
             keys.shift.pressed = true
 
             break
-        case 'Escape':
-            if (!inventory) inventory = true
-            else inventory = false
-
-            break
+        
         case '2':
             hotbar.item = hotbar.item2
 
@@ -83,10 +79,6 @@ window.addEventListener('keyup', (event) => {
             keys.shift.pressed = false
 
             break
-        // case 'Escape':
-        //     keys.ESC.pressed = false
-
-        //     break
     }
 
 })

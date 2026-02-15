@@ -27,8 +27,8 @@ class Enemy {
             bottom: this.position.y + this.height
         }
         this.gravity = 1
-        this.maxHP = 200
-        this.HP = 200
+        this.maxHP = 100
+        this.HP = this.maxHP
         this.healspeed = 0.1
         this.mode1 = "idle"
         this.mode2 = "walk"
@@ -48,15 +48,26 @@ class Enemy {
         this.jumpchance = 0.75
         this.runaway = false
         this.runawaydistance = 750 + Math.random() * 200
+        this.amountofcrates = 10
+        this.cratecooldown = 0
+        this.finishcooldown = 0
+        this.maxcooldown = 50
     }
     draw() {
         c.drawImage(this.image, this.frame * this.width, 0, this.width, this.height, this.position.x, this.position.y, this.width, this.height)
+        c.fillStyle = 'black'
+        c.fillRect(this.position.x + 13, this.position.y + 9, this.maxHP + 2, 7)
+        c.fillStyle = 'pink'
+        c.fillRect(this.position.x + 14, this.position.y + 10, this.maxHP, 5)
         c.fillStyle = 'red'
-        c.fillRect(this.position.x + 14, this.position.y + 10, this.HP/2, 5)
-
+        c.fillRect(this.position.x + 14, this.position.y + 10, this.HP, 5)
     }
     update() {
-        if (this.HP < this.maxHP) {
+        console.log(this.cratecooldown)
+        if (this.cratecooldown !== this.finishcooldown) {
+            this.cratecooldown--
+        }
+        if (this.HP < this.maxHP && this.markedForDeletion === false) {
             this.HP += this.healspeed
         }
         this.isjumping = false
@@ -118,7 +129,23 @@ class Enemy {
         } else {
             this.changeframe++
         }
-        //mode changeing
+        //place crates
+        if (this.amountofcrates > 0 && this.cratecooldown === this.finishcooldown) {
+            projectiles.forEach(projectile => {
+                if (projectile.position.y > this.position.y && projectile.position.y < this.position.y + this.height && projectile.type === "friendly") {
+                    if (this.direction === "right") {
+                        crates.push(new Crate(this.position.x - 50, this.sides.bottom - 50, "hostile"));
+                        crates.push(new Crate(this.position.x - 50, this.sides.bottom - 100, "hostile"));
+                    } else if (this.direction === "left") {
+                        crates.push(new Crate(this.position.x + this.width, this.sides.bottom - 50, "hostile"));
+                        crates.push(new Crate(this.position.x + this.width, this.sides.bottom - 100, "hostile"));
+                    }
+                    this.cratecooldown = this.maxcooldown
+                    this.amountofcrates--
+                }
+            })
+        }
+        //runaway
         if (this.runaway === true && this.position.x + this.runawaydistance > player.position.x && this.position.x - this.runawaydistance < player.position.x) {
             if (this.position.x < player.position.x) {
                 this.direction = this.directions2
@@ -129,7 +156,9 @@ class Enemy {
                 this.velocity.x = this.sprintspeed
                 this.mode = this.mode3
             }
-        } else if (this.gunpoint > player.position.y && this.gunpoint < player.position.y + player.height && Math.random() <= this.shootchance && player.mode !== player.mode7 && player.mode !== player.mode8) {
+        } 
+        //shooting
+        else if (this.gunpoint > player.position.y && this.gunpoint < player.position.y + player.height && Math.random() <= this.shootchance && player.mode !== player.mode7 && player.mode !== player.mode8) {
             this.mode = this.mode4
             this.velocity.x = 0
             if (player.position.x > this.position.x) {
@@ -138,7 +167,9 @@ class Enemy {
                 this.direction = this.directions2
             }
             this.maxframe = 3
-        } else if (player.position.x - this.sprintrange > this.position.x && Math.random() <= this.sprintchance && this.runaway === false) {
+        } 
+        //running
+        else if (player.position.x - this.sprintrange > this.position.x && Math.random() <= this.sprintchance && this.runaway === false) {
             this.direction = this.directions1
             this.velocity.x = this.sprintspeed
             this.mode = this.mode3
@@ -146,7 +177,9 @@ class Enemy {
             this.direction = this.directions2
             this.velocity.x = -this.sprintspeed
             this.mode = this.mode3
-        } else if (player.position.x > this.position.x && Math.random() <= this.walkchance && this.runaway === false) {
+        } 
+        //walking
+        else if (player.position.x > this.position.x && Math.random() <= this.walkchance && this.runaway === false) {
             this.direction = this.directions1
             this.velocity.x = this.walkspeed
             this.mode = this.mode2
@@ -154,12 +187,7 @@ class Enemy {
             this.direction = this.directions2
             this.velocity.x = -this.walkspeed
             this.mode = this.mode2
-        } 
-        // else {
-        //     this.velocity.x = 0
-        //     this.mode = this.mode1
-        //     this.maxframe = 6
-        // }
+        }
         
         // jumping
         if ((this.gunpoint > player.position.y + player.height) && this.jumped > 0 && Math.abs(this.velocity.y) <= 1 && Math.random() <= this.jumpchance && this.runaway === false) {

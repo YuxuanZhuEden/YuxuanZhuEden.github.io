@@ -1,5 +1,5 @@
 class Crate {
-    constructor(x, y) {
+    constructor(x, y, type) {
         this.width = 50
         this.height = 50
         this.position = {
@@ -7,12 +7,13 @@ class Crate {
             y: y,
         }
         this.image = document.getElementById("Crate")
-        this.HP = 1000
+        this.HP = 100
         this.markedForDeletion = false
+        this.type = type
     }
     draw() {
         c.fillStyle = 'red'
-        c.fillRect(this.position.x - 25, this.position.y - 20, this.HP / 10, 5)
+        c.fillRect(this.position.x - 25, this.position.y - 20, this.HP, 5)
         c.drawImage(this.image, this.position.x, this.position.y, this.width, this.height)
     }
     update() {

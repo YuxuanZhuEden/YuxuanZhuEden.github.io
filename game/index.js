@@ -7,10 +7,9 @@ canvas.height = 800
 const maxnextround = 500
 var nextround = 0
 var loadingnextround = false
-var inventory = false
 const player = new Player()
 const hotbar = new Hotbar()
-const bulletspeed = 25
+const bulletspeed = 50
 const grenadespeed = 5
 let gameover = false
 var round = 1
@@ -62,26 +61,22 @@ const keys = {
 }
 function animate() {
     window.requestAnimationFrame(animate)
-    if (!inventory) {
-
-        c.fillStyle = 'white'
-        c.fillRect(0, 0, canvas.width, canvas.height)
-    } else {
-        c.drawImage(document.getElementById('inventory'), 200, 0, 176 * 6.11, canvas.height)
-
-    }
-
+    //background
+    c.fillStyle = 'white'
+    c.fillRect(0, 0, canvas.width, canvas.height)
+    //health bar
     c.fillStyle = 'black'
-    c.fillRect(57, 4, player.maxHP + 5, 30)
+    c.fillRect(57, 4, player.maxHP/4 + 5, 30)
     c.fillStyle = 'pink'
-    c.fillRect(60, 7, player.maxHP, 25)
+    c.fillRect(60, 7, player.maxHP/4, 25)
     c.fillStyle = 'red'
-    c.fillRect(60, 7, player.HP, 25)
+    c.fillRect(60, 7, player.HP/4, 25)
     c.font = "30px serif"
     c.fillText("HP", 10, 30)
     hotbar.draw()
+    c.fillStyle = 'black'
+    c.fillText("Enemies Left: " + enemies.length, 1150, 30)
 
-    if (!inventory) {
         if (enemies.length === 0) {
             loadingnextround = true
         }
@@ -117,29 +112,28 @@ function animate() {
             //sprinting left and right
             else if (keys.rightarrow.pressed && keys.shift.pressed) {
                 player.velocity.x = player.sprintspeed
-                player.direction = player.directions2
+                player.direction = "right"
                 player.mode = player.mode4
             } else if (keys.leftarrow.pressed && keys.shift.pressed) {
                 player.velocity.x = -player.sprintspeed
-                player.direction = player.directions1
+                player.direction = "left"
                 player.mode = player.mode4
             } // moveing left and right
             else if (keys.rightarrow.pressed) {
                 player.velocity.x = player.walkspeed
-                player.direction = player.directions2
+                player.direction = "right"
                 player.mode = player.mode3
             } else if (keys.leftarrow.pressed) {
                 player.velocity.x = -player.walkspeed
-                player.direction = player.directions1
+                player.direction = "left"
                 player.mode = player.mode3
             } else {
                 player.mode = player.mode1
                 player.velocity.x = 0
             }
         }
-            player.update()
-            player.draw()
-
+        player.update()
+        player.draw()
         projectiles.forEach(projectile => {
             projectile.draw();
             projectile.update();
@@ -161,6 +155,5 @@ function animate() {
             crate.update();
         })
         crates = crates.filter(crate => !crate.markedForDeletion)
-    }
 }
     animate()
