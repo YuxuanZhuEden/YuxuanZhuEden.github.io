@@ -4,7 +4,7 @@ class Enemy {
         this.frame = 0
         this.directions1 = "left"
         this.directions2 = "right"
-        this.jumped = 0
+        this.jumped = 2
         this.maxjump = 2
         this.walkspeed = 2.5
         this.sprintspeed = 7.5
@@ -51,7 +51,7 @@ class Enemy {
         this.amountofcrates = 10
         this.cratecooldown = 0
         this.finishcooldown = 0
-        this.maxcooldown = 50
+        this.maxcooldown = 25
     }
     draw() {
         c.drawImage(this.image, this.frame * this.width, 0, this.width, this.height, this.position.x, this.position.y, this.width, this.height)
@@ -63,7 +63,9 @@ class Enemy {
         c.fillRect(this.position.x + 14, this.position.y + 10, this.HP, 5)
     }
     update() {
-        console.log(this.cratecooldown)
+        // console.log("crate cool down", this.cratecooldown)
+        // console.log("crate amount", this.amountofcrates)
+        // console.log("stored jumps", this.jumped)
         if (this.cratecooldown !== this.finishcooldown) {
             this.cratecooldown--
         }
@@ -74,7 +76,7 @@ class Enemy {
         this.onCrate = false
         this.gunpoint = this.position.y + 76
         //run away
-        if (this.HP <= 50) {
+        if (this.HP <= this.maxHP/2) {
             this.runaway = true
         } else {
             this.runaway = false
@@ -129,8 +131,8 @@ class Enemy {
         } else {
             this.changeframe++
         }
-        //place crates
-        if (this.amountofcrates > 0 && this.cratecooldown === this.finishcooldown) {
+        //place crates to block
+        if (this.amountofcrates > 1 && this.cratecooldown === this.finishcooldown) {
             projectiles.forEach(projectile => {
                 if (projectile.position.y > this.position.y && projectile.position.y < this.position.y + this.height && projectile.type === "friendly") {
                     if (this.direction === "right") {
@@ -141,9 +143,17 @@ class Enemy {
                         crates.push(new Crate(this.position.x + this.width, this.sides.bottom - 100, "hostile"));
                     }
                     this.cratecooldown = this.maxcooldown
-                    this.amountofcrates--
+                    this.amountofcrates -= 2
                 }
             })
+        }
+        //place crates to climb
+        if (this.amountofcrates > 0 && this.cratecooldown === this.finishcooldown) {
+            if (this.jumped === 0) {
+                crates.push(new Crate(this.position.x, this.sides.bottom, "hostile"));
+                this.cratecooldown = this.maxcooldown
+                this.amountofcrates--
+            }
         }
         //runaway
         if (this.runaway === true && this.position.x + this.runawaydistance > player.position.x && this.position.x - this.runawaydistance < player.position.x) {

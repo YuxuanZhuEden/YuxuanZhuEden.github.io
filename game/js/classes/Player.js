@@ -15,8 +15,8 @@ class Player {
         this.jumpheight = -20
         this.isjumping = false
         this.position = {
-            x: 1300,
-            y: 100,
+            x: 2872,
+            y: -128,
         }
 
         this.velocity = {
@@ -44,11 +44,23 @@ class Player {
         this.mode6 = "Kneel";
         this.mode7 = "Dying";
         this.mode8 = "Dead";
+        this.mode9 = "Grenade"
+        this.cratecooldown = 0
+        this.finishcooldown = 0
+        this.bombcooldown = 0
+        this.maxcooldown = 25
+        this.maxbombcooldown = 50
     }
     draw() {
         c.drawImage(this.image, this.frame * this.width, 0, this.width, this.height, this.position.x, this.position.y, this.width, this.height)
     }
     update() {
+        if (this.cratecooldown !== this.finishcooldown) {
+            this.cratecooldown--
+        }
+        if (this.bombcooldown !== this.finishcooldown) {
+            this.bombcooldown--
+        }
         if (this.reload < this.maxreload) {
             this.reload++
         }
@@ -83,13 +95,22 @@ class Player {
                     this.reload = 0
                 }
             }
-        } else if (hotbar.crateamount > 0 && keys.space.pressed === true && hotbar.item === hotbar.item2 && this.frame === 2 && this.changeframe === 0) {
+        } else if (hotbar.crateamount > 0 && keys.space.pressed === true && hotbar.item === hotbar.item2 && this.cratecooldown === this.finishcooldown) {
             if (this.direction === "left") {
                 crates.push(new Crate(this.position.x - 50, this.sides.bottom - 50, "friendly"));
             } else if (this.direction === "right") {
                 crates.push(new Crate(this.position.x + this.width, this.position.y + this.height - 50, "friendly"));
             }
-            hotbar.crateamount--
+            this.cratecooldown = this.maxcooldown
+            hotbar.crateamount --
+        } else if (hotbar.bombamount > 0 && keys.space.pressed === true && hotbar.item === hotbar.item3 && this.bombcooldown === this.finishcooldown) {
+            if (this.direction === "left") {
+                grenades.push(new Grenade(this.position.x + 90, this.position.y + 87, -grenadespeed));
+            } else if (this.direction === "right") {
+                grenades.push(new Grenade(this.position.x + 36, this.position.y + 87, grenadespeed));
+            }
+            this.bombcooldown = this.maxbombcooldown
+            hotbar.bombamount --
         }
 
         if (this.direction === "right") {

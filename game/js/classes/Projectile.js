@@ -15,6 +15,7 @@ class Projectile {
     }
     draw() {
         c.drawImage(this.image, this.position.x, this.position.y, this.width, this.height)
+        c.fillRect(this.position.x, this.position.y, this.width, this.height)
     }
     update() {
         this.position.x += this.speed

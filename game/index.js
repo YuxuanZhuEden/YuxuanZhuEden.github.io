@@ -2,34 +2,24 @@
 const canvas = document.querySelector('canvas')
 const c = canvas.getContext('2d')
 
-canvas.width = 1500
-canvas.height = 800
-const maxnextround = 500
+canvas.width = 3000
+canvas.height = 1800
+const maxnextround = 1000
 var nextround = 0
 var loadingnextround = false
 const player = new Player()
 const hotbar = new Hotbar()
 const bulletspeed = 50
-const grenadespeed = 5
+const grenadespeed = 10
 let gameover = false
-var round = 1
+var round = 0
 var projectiles = []
 var enemies = [];
-enemies.push(new Enemy(Math.random() * 1000, 0));
-enemies.push(new Enemy(Math.random() * 1000, 0));
 var helpers = [];
 // helpers.push(new Helper(Math.random() * 1000, 0));
-// helpers.push(new Helper(Math.random() * 1000, 0));
-// helpers.push(new Helper(Math.random() * 1000, 0));
-// helpers.push(new Helper(Math.random() * 1000, 0));
-// helpers.push(new Helper(Math.random() * 1000, 0));
-// helpers.push(new Helper(Math.random() * 1000, 0));
-// helpers.push(new Helper(Math.random() * 1000, 0));
-// helpers.push(new Helper(Math.random() * 1000, 0));
-// helpers.push(new Helper(Math.random() * 1000, 0));
-// helpers.push(new Helper(Math.random() * 1000, 0));
-
 var crates = [];
+var grenades = [];
+// crates.push(new Crate(1350, 300))
 const keys = {
     uparrow: {
         pressed: false
@@ -76,6 +66,7 @@ function animate() {
     hotbar.draw()
     c.fillStyle = 'black'
     c.fillText("Enemies Left: " + enemies.length, 1150, 30)
+    // console.log(nextround)
 
         if (enemies.length === 0) {
             loadingnextround = true
@@ -84,21 +75,22 @@ function animate() {
             nextround++
             c.font = "30px serif"
             c.fillStyle = '#ff0000'
-            // console.log("*** filltext test")
-            c.fillText("LOADING...", 740, 400)
+            if (nextround < 750) {
+                c.fillText("Paratrooper Team "+(round+1)+" Dropping Down", 740, 400)
+            } else if (nextround >= 750) {
+                c.fillText("Copy That", 740, 400)
+            }
         }
         if (nextround >= maxnextround) {
             round++
             nextround = 0
-            hotbar.crateamount += 10
-            loadingnextround = false
-            for (let i = 0; i < round * 2; i++) {
-                enemies.push(new Enemy(Math.random() * 800, 0));
+            if (round !== 1) {
+                hotbar.crateamount += 10 
             }
-            // helpers.push(new Helper(Math.random() * 100, 0));
-            // helpers.push(new Helper(Math.random() * 100, 0));
-            // helpers.push(new Helper(Math.random() * 100, 0));
-            // helpers.push(new Helper(Math.random() * 100, 0));
+            loadingnextround = false
+            for (let i = 0; i < round * 5; i++) {
+                enemies.push(new Enemy(Math.random() * 2872, -128));
+            }
             // helpers.push(new Helper(Math.random() * 100, 0));
         }
         if (player.mode !== player.mode7 && player.mode !== player.mode8) {
@@ -135,25 +127,30 @@ function animate() {
         player.update()
         player.draw()
         projectiles.forEach(projectile => {
-            projectile.draw();
             projectile.update();
+            projectile.draw();
         })
         projectiles = projectiles.filter(projectile => !projectile.markedForDeletion)
         enemies.forEach(enemy => {
-            enemy.draw();
             enemy.update();
+            enemy.draw();
         })
         enemies = enemies.filter(enemy => !enemy.markedForDeletion)
         helpers.forEach(enemy => {
-            enemy.draw();
             enemy.update();
+            enemy.draw();
         })
         helpers = helpers.filter(helper => !helper.markedForDeletion)
 
         crates.forEach(crate => {
-            crate.draw();
             crate.update();
+            crate.draw();
         })
         crates = crates.filter(crate => !crate.markedForDeletion)
+        grenades.forEach(grenade => {
+            grenade.update();
+            grenade.draw();
+        })
+        grenades = grenades.filter(grenade => !grenade.markedForDeletion)
 }
     animate()

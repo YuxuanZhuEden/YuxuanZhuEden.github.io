@@ -36,6 +36,11 @@ window.addEventListener('keydown', (event) => {
 
 
             break
+        case '3':
+            hotbar.item = hotbar.item3
+
+
+            break
         // case 'b':
         //     enemies.push(new Enemy(Math.random() * 1000, 0));
 

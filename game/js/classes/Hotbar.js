@@ -2,9 +2,11 @@ class Hotbar {
     constructor() {
         this.x = canvas.width - 75
         this.y = 5
-        this.crateamount = 10
-        this.item2 = "Crate"
+        this.crateamount = 50
+        this.bombamount = 50
+        this.item2 = 'Crate'
         this.item1 = 'sniperrifle'
+        this.item3 = 'bomb'
         this.item = this.item1
         this.image = document.getElementById('hotbar')
     }
@@ -14,8 +16,11 @@ class Hotbar {
         if (this.item === this.item2) {
             c.fillStyle = 'green'
             c.fillText(this.crateamount, this.x + 45, this.y + 75)
+        } else if (this.item === this.item3) {
+            c.fillStyle = 'green'
+            c.fillText(this.bombamount, this.x + 45, this.y + 75)
         }
-        if (this.crateamount <= 0) this.item = this.item1
+        // if (this.crateamount <= 0) this.item = this.item1
     }
     update() {
 

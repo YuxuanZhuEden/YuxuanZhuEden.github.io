@@ -7,34 +7,78 @@ class Grenade {
         this.width = 7
         this.height = 7
         this.speed = speed
-        
         this.image = document.getElementById('grenade')
-        this.type = type
         this.markedForDeletion = false
-        this.fall = -Math.random() - 5
+        this.fall = Math.random() * 5 - 10
         this.frame = 0
-        this.maxframe
-        this.changeframe = 0
-        this.maxchangeframe = 5 - 1
+        this.maxframe = 3
         this.mode1 = "flying"
         this.mode2 = "exploding"
-        this.mode = this.mode1
+        this.mode = "flying"
+        this.gravity = 0.5
     }
     draw() {
-        c.drawImage(this.image, this.position.x, this.position.y, this.width, this.height)
+        c.drawImage(this.image, this.frame * this.width, 0, this.width, this.height, this.position.x, this.position.y, this.width, this.height)
     }
     update() {
+        // console.log(this.mode)
+        if (this.mode === "flying") {
         this.position.x += this.speed
         this.position.y += this.fall
-        if (this.position.y <= canvas.height) {
-            this.mode = this.mode2
-            this.width = 100
-            this.height = 100
-            enemies.forEach(enemy => {
-                checkcolision(enemy, this)
-            })
-        } else {
-            this.fall += 0.3
         }
+        //change frame
+            if (this.frame < this.maxframe) {
+                this.frame++
+            } else {
+                if (this.mode === "exploding") {
+                    this.markedForDeletion = true
+                } else {
+                    this.frame = 0
+                } 
+            } 
+            //check for explosion
+                //explode against ground
+            if (this.mode === "flying") {
+                if (this.position.y + this.height >= canvas.height && this.mode === "flying") {
+                    this.mode = "exploding"
+                    this.image = document.getElementById('explosion')
+                    this.height = 128
+                    this.width = 128
+                    this.position.y = canvas.height - 7
+                    this.position.x -= 60.5
+                    this.position.y -= 120
+                    this.maxframe = 8
+                    this.frame = 1
+                }
+                if (this.mode === "flying") {
+                    this.fall += this.gravity
+                }
+                //check explosion with enemy
+                enemies.forEach(enemy => {
+                    if (this.mode === "exploding") {
+                        if (checkCollision(enemy, this)) {
+                            enemy.HP -= 101
+                        }
+                    }
+                })
+                //check explosion with crates
+                crates.forEach(crate => {
+                    if (this.mode === "flying" && checkCollision(crate, this) && crate.type === "hostile") {
+                        this.mode = "exploding"
+                        this.image = document.getElementById('explosion')
+                        this.height = 128
+                        this.width = 128
+                        this.position.x -= 60.5
+                        this.position.y -= 121
+                        this.maxframe = 8
+                        this.frame = 1
+                    }
+                    if (this.mode === "exploding") {
+                        if (checkCollision(crate, this)) {
+                            crate.HP -= 101
+                        }
+                    }
+                })
+            }
     }
 }
