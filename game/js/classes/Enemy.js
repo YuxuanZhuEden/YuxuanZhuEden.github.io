@@ -37,7 +37,7 @@ class Enemy {
         this.mode5 = "shoot2"
         this.mode = this.mode1
         this.changeframe = 0
-        this.maxchangeframe = 20
+        this.maxchangeframe = 5
         this.image = document.getElementById('Idle')
         this.markedForDeletion = false
         this.gunpoint = this.position.y + 76
@@ -52,6 +52,7 @@ class Enemy {
         this.cratecooldown = 0
         this.finishcooldown = 0
         this.maxcooldown = 20
+        this.ammoamount = 25
     }
     draw() {
         c.drawImage(this.image, this.frame * this.width, 0, this.width, this.height, this.position.x, this.position.y, this.width, this.height)
@@ -101,6 +102,7 @@ class Enemy {
                 this.image = document.getElementById('Shoot')
                 if (this.frame === 2 && this.changeframe === 0) {
                     projectiles.push(new Projectile(this.position.x + 86, this.position.y + 76, bulletspeed, "hostile"))
+                    this.ammoamount --
                 }
             } 
         } else if (this.direction === this.directions2) {
@@ -114,6 +116,7 @@ class Enemy {
                 this.image = document.getElementById('Shootleft')
                 if (this.frame === 1 && this.changeframe === 0) {
                     projectiles.push(new Projectile(this.position.x + 86, this.position.y + 76, -bulletspeed, "hostile"))
+                    this.ammoamount --
                 }
             }
         }
@@ -165,7 +168,7 @@ class Enemy {
             }
         } 
         //shooting
-        else if (this.gunpoint > player.position.y && this.gunpoint < player.position.y + player.height && Math.random() <= this.shootchance && player.mode !== player.mode7 && player.mode !== player.mode8) {
+        else if (this.gunpoint > player.position.y && this.gunpoint < player.position.y + player.height && Math.random() <= this.shootchance && player.mode !== player.mode7 && player.mode !== player.mode8 && this.ammoamount > 0) {
             this.mode = this.mode4
             this.velocity.x = 0
             if (player.position.x > this.position.x) {
@@ -220,6 +223,10 @@ class Enemy {
         //delete when dead
         if (this.HP <= 0) {
             this.markedForDeletion = true
+            while (this.ammoamount > 0) {
+                this.ammoamount--
+                ammos.push(new Ammo(this.position.x - 64 + Math.random() * 256, this.position.y));
+            }
         }
         
     }

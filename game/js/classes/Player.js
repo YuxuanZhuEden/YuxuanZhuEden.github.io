@@ -34,7 +34,7 @@ class Player {
         this.healspeed = 0.1
         this.mode = "Idle"
         this.changeframe = 0
-        this.maxchangeframe = 20 
+        this.maxchangeframe = 5
         this.dead = false
         this.mode1 = "Idle";
         this.mode2 = "Shoot";
@@ -84,8 +84,8 @@ class Player {
                 } else if (this.direction === "right") {
                     projectiles.push(new Projectile(this.position.x + 40, this.position.y + 76, bulletspeed, "friendly")) 
                     this.reload = 0
-
                 }
+                hotbar.ammoamount --
             } else if (this.mode === 'Shoot2' && this.frame === 3 && this.changeframe === 0) {
                 if (this.direction === "left") {
                     projectiles.push(new Projectile(this.position.x + 90, this.position.y + 87, -bulletspeed, "friendly"))
@@ -94,6 +94,7 @@ class Player {
                     projectiles.push(new Projectile(this.position.x + 36, this.position.y + 87, bulletspeed, "friendly"))   
                     this.reload = 0
                 }
+                hotbar.ammoamount --
             }
         } else if (hotbar.crateamount > 0 && keys.downarrow.pressed === true && hotbar.item === hotbar.item2 && this.cratecooldown === this.finishcooldown) {
             crates.push(new Crate(this.position.x + 39, this.position.y + this.height, "friendly"));

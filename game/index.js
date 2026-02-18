@@ -1,4 +1,3 @@
-
 const canvas = document.querySelector('canvas')
 const c = canvas.getContext('2d')
 
@@ -20,6 +19,7 @@ var helpers = [];
 var crates = [];
 var grenades = [];
 var airdrops = [];
+var ammos = [];
 airdrops.push(new AirDrop(Math.random() * 6000, -500))
 const keys = {
     uparrow: {
@@ -66,7 +66,6 @@ function animate() {
     c.fillText("HP", 10, 30)
     c.fillStyle = 'black'
     c.fillText("Enemies Left: " + enemies.length, 1150, 30)
-    // console.log(nextround)
 
         if (enemies.length === 0 && loadingnextround === false) {
             loadingnextround = true
@@ -98,7 +97,7 @@ function animate() {
                 player.mode = player.mode5
             } else if (keys.space.pressed === true && keys.downarrow.pressed === false && player.reload === player.maxreload && hotbar.item === hotbar.item1 && hotbar.ammoamount > 0) {
                 player.mode = player.mode2
-            } else if (keys.downarrow.pressed === true && hotbar.item === hotbar.item1 && hotbar.ammoamount > 0) {
+            } else if (keys.downarrow.pressed === true && hotbar.item === hotbar.item1) {
                 player.mode = player.mode6
             }
             //sprinting left and right
@@ -159,5 +158,10 @@ function animate() {
             box.draw();
         })
         airdrops = airdrops.filter(box => !box.markedForDeletion)
+        ammos.forEach(ammo => {
+            ammo.update();
+            ammo.draw();
+        })
+        ammos = ammos.filter(ammo => !ammo.markedForDeletion)
 }
     animate()
