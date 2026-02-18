@@ -48,7 +48,7 @@ class Player {
         this.cratecooldown = 0
         this.finishcooldown = 0
         this.bombcooldown = 0
-        this.maxcooldown = 25
+        this.maxcooldown = 20
         this.maxbombcooldown = 50
     }
     draw() {
@@ -95,19 +95,28 @@ class Player {
                     this.reload = 0
                 }
             }
+        } else if (hotbar.crateamount > 0 && keys.downarrow.pressed === true && hotbar.item === hotbar.item2 && this.cratecooldown === this.finishcooldown) {
+            crates.push(new Crate(this.position.x + 39, this.position.y + this.height, "friendly"));
+            this.velocity.y = -10
+            this.cratecooldown = this.maxcooldown
+            hotbar.crateamount --
         } else if (hotbar.crateamount > 0 && keys.space.pressed === true && hotbar.item === hotbar.item2 && this.cratecooldown === this.finishcooldown) {
             if (this.direction === "left") {
-                crates.push(new Crate(this.position.x - 50, this.sides.bottom - 50, "friendly"));
+                crates.push(new Crate(this.position.x - 50, this.position.y + this.height - 50, "friendly"));
             } else if (this.direction === "right") {
                 crates.push(new Crate(this.position.x + this.width, this.position.y + this.height - 50, "friendly"));
             }
             this.cratecooldown = this.maxcooldown
             hotbar.crateamount --
+        } else if (hotbar.bombamount > 0 && keys.downarrow.pressed === true && hotbar.item === hotbar.item3 && this.bombcooldown === this.finishcooldown) {
+            grenades.push(new Grenade(this.position.x + 90, this.position.y + 87, 0, Math.random() * 5 - 15));
+            this.bombcooldown = this.maxbombcooldown
+            hotbar.bombamount --
         } else if (hotbar.bombamount > 0 && keys.space.pressed === true && hotbar.item === hotbar.item3 && this.bombcooldown === this.finishcooldown) {
             if (this.direction === "left") {
-                grenades.push(new Grenade(this.position.x + 90, this.position.y + 87, -grenadespeed));
+                grenades.push(new Grenade(this.position.x + 90, this.position.y + 87, -grenadespeed, Math.random() * 5 - 10));
             } else if (this.direction === "right") {
-                grenades.push(new Grenade(this.position.x + 36, this.position.y + 87, grenadespeed));
+                grenades.push(new Grenade(this.position.x + 36, this.position.y + 87, grenadespeed, Math.random() * 5 - 10));
             }
             this.bombcooldown = this.maxbombcooldown
             hotbar.bombamount --
@@ -222,13 +231,13 @@ class Player {
         } else {
             this.velocity.y += this.gravity
         }
-        if (this.mode === "Shoot" || this.mode === "Shoot2") {
+        if (this.mode === "Shoot" || this.mode === "Shoot2" || this.mode === "Dying"|| this.mode === "Dead") {
             this.velocity.x = 0
         } 
 
         this.sides.bottom = this.position.y + this.height;
-            this.position.x += this.velocity.x
-            this.position.y += this.velocity.y
+        this.position.x += this.velocity.x
+        this.position.y += this.velocity.y
         // console.log(this.mode)
 
     }

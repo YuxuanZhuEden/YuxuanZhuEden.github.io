@@ -1,5 +1,5 @@
 class Grenade {
-    constructor(x, y, speed) {
+    constructor(x, y, speed, fall) {
         this.position = {
             x: x,
             y: y
@@ -9,7 +9,7 @@ class Grenade {
         this.speed = speed
         this.image = document.getElementById('grenade')
         this.markedForDeletion = false
-        this.fall = Math.random() * 5 - 10
+        this.fall = fall
         this.frame = 0
         this.maxframe = 3
         this.mode1 = "flying"
@@ -38,7 +38,6 @@ class Grenade {
             } 
             //check for explosion
                 //explode against ground
-            if (this.mode === "flying") {
                 if (this.position.y + this.height >= canvas.height && this.mode === "flying") {
                     this.mode = "exploding"
                     this.image = document.getElementById('explosion')
@@ -53,17 +52,9 @@ class Grenade {
                 if (this.mode === "flying") {
                     this.fall += this.gravity
                 }
-                //check explosion with enemy
-                enemies.forEach(enemy => {
-                    if (this.mode === "exploding") {
-                        if (checkCollision(enemy, this)) {
-                            enemy.HP -= 101
-                        }
-                    }
-                })
                 //check explosion with crates
                 crates.forEach(crate => {
-                    if (this.mode === "flying" && checkCollision(crate, this) && crate.type === "hostile") {
+                    if (this.mode === "flying" && checkCollision(crate, this)) {
                         this.mode = "exploding"
                         this.image = document.getElementById('explosion')
                         this.height = 128
@@ -74,11 +65,18 @@ class Grenade {
                         this.frame = 1
                     }
                     if (this.mode === "exploding") {
-                        if (checkCollision(crate, this)) {
+                        if (checkCollision(crate, this) && crate.type === "hostile") {
                             crate.HP -= 101
                         }
                     }
                 })
-            }
+                //check explosion with enemy
+                enemies.forEach(enemy => {
+                    if (this.mode === "exploding") {
+                        if (checkCollision(enemy, this)) {
+                            enemy.HP -= 101
+                        }
+                    }
+                })
     }
 }

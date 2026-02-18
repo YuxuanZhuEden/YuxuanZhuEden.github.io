@@ -1,4 +1,4 @@
-//player
+//Enemy
 class Enemy {
     constructor(x, y) {
         this.frame = 0
@@ -37,7 +37,7 @@ class Enemy {
         this.mode5 = "shoot2"
         this.mode = this.mode1
         this.changeframe = 0
-        this.maxchangeframe = 5 - 1
+        this.maxchangeframe = 20
         this.image = document.getElementById('Idle')
         this.markedForDeletion = false
         this.gunpoint = this.position.y + 76
@@ -51,7 +51,7 @@ class Enemy {
         this.amountofcrates = 10
         this.cratecooldown = 0
         this.finishcooldown = 0
-        this.maxcooldown = 25
+        this.maxcooldown = 20
     }
     draw() {
         c.drawImage(this.image, this.frame * this.width, 0, this.width, this.height, this.position.x, this.position.y, this.width, this.height)
@@ -63,9 +63,6 @@ class Enemy {
         c.fillRect(this.position.x + 14, this.position.y + 10, this.HP, 5)
     }
     update() {
-        // console.log("crate cool down", this.cratecooldown)
-        // console.log("crate amount", this.amountofcrates)
-        // console.log("stored jumps", this.jumped)
         if (this.cratecooldown !== this.finishcooldown) {
             this.cratecooldown--
         }
@@ -223,7 +220,6 @@ class Enemy {
         //delete when dead
         if (this.HP <= 0) {
             this.markedForDeletion = true
-            hotbar.crateamount += 1
         }
         
     }
