@@ -12,7 +12,6 @@ class Hotbar {
         this.image = document.getElementById('hotbar')
     }
     draw() {
-        console.log(this.ammoamount)
         c.font = "30px serif"
         c.drawImage(this.image, this.x, this.y)
         c.drawImage(document.getElementById(this.item), canvas.width - 65, 15, 50, 50)

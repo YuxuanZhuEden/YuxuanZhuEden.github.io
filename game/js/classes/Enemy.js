@@ -47,29 +47,51 @@ class Enemy {
         this.sprintchance = 0.1
         this.jumpchance = 0.75
         this.runaway = false
-        this.runawaydistance = 750 + Math.random() * 200
+        this.runawaydistance = 2000 + Math.random() * 5000
         this.amountofcrates = 10
         this.cratecooldown = 0
         this.finishcooldown = 0
         this.maxcooldown = 20
-        this.ammoamount = 25
+        this.ammoamount = 50
+        this.maxframe = 6
+        this.target = player
+        this.attackedbyhelper = true
     }
     draw() {
         c.drawImage(this.image, this.frame * this.width, 0, this.width, this.height, this.position.x, this.position.y, this.width, this.height)
         c.fillStyle = 'black'
-        c.fillRect(this.position.x + 13, this.position.y + 9, this.maxHP + 2, 7)
+        c.fillRect(this.position.x + 13, this.position.y + 9, (this.maxHP + 2), 7)
         c.fillStyle = 'pink'
         c.fillRect(this.position.x + 14, this.position.y + 10, this.maxHP, 5)
         c.fillStyle = 'red'
         c.fillRect(this.position.x + 14, this.position.y + 10, this.HP, 5)
     }
     update() {
+        //switching targets
+        if (this.ammoamount <= 0 && ammos.length > 0) {
+            this.target = ammos[0]
+        } else if (helpers.length > 0 && this.attackedbyhelper === true) {
+            this.target = helpers[0]
+        } else if (flag1.mode === "friendly") {
+            this.target = flag1
+        } else if (flag2.mode === "friendly") {
+            this.target = flag2
+        } else {
+            this.target = player
+        }
+        //limiting amount of ammo
+        if (this.ammoamount > 100) {
+            this.ammoamount = 100
+        }
+        //cooling down
         if (this.cratecooldown !== this.finishcooldown) {
             this.cratecooldown--
         }
+        //healing
         if (this.HP < this.maxHP && this.markedForDeletion === false) {
             this.HP += this.healspeed
         }
+        //resetting
         this.isjumping = false
         this.onCrate = false
         this.gunpoint = this.position.y + 76
@@ -94,12 +116,16 @@ class Enemy {
         if (this.direction === this.directions1) {
             if (this.mode === this.mode1) {
                 this.image = document.getElementById('Idle')
+                this.maxframe = 6
             } else if(this.mode === this.mode2) {
                 this.image = document.getElementById('Walk')
+                this.maxframe = 7
             } else if (this.mode === this.mode3) {
-                this.image = document.getElementById('Run')     
+                this.image = document.getElementById('Run')
+                this.maxframe = 5
             } else if (this.mode === this.mode4) {
                 this.image = document.getElementById('Shoot')
+                this.maxframe = 3
                 if (this.frame === 2 && this.changeframe === 0) {
                     projectiles.push(new Projectile(this.position.x + 86, this.position.y + 76, bulletspeed, "hostile"))
                     this.ammoamount --
@@ -107,12 +133,16 @@ class Enemy {
             } 
         } else if (this.direction === this.directions2) {
             if (this.mode === this.mode1) {
+                this.maxframe = 6
                 this.image = document.getElementById('Idleleft')
             } else if(this.mode === this.mode2) {
+                this.maxframe = 7
                 this.image = document.getElementById('Walkleft')
             } else if (this.mode === this.mode3) {
+                this.maxframe = 5
                 this.image = document.getElementById('Runleft')     
             } else if (this.mode === this.mode4) {
+                this.maxframe = 3
                 this.image = document.getElementById('Shootleft')
                 if (this.frame === 1 && this.changeframe === 0) {
                     projectiles.push(new Projectile(this.position.x + 86, this.position.y + 76, -bulletspeed, "hostile"))
@@ -156,51 +186,50 @@ class Enemy {
             }
         }
         //runaway
-        if (this.runaway === true && this.position.x + this.runawaydistance > player.position.x && this.position.x - this.runawaydistance < player.position.x) {
-            if (this.position.x < player.position.x) {
+        if (this.target !== flag1 && this.target !== flag2 && this.runaway === true && this.position.x + this.runawaydistance > this.target.position.x && this.position.x - this.runawaydistance < this.target.position.x) {
+            if (this.position.x < this.target.position.x) {
                 this.direction = this.directions2
                 this.velocity.x = -this.sprintspeed
                 this.mode = this.mode3
-            } else if (this.position.x > player.position.x) {
+            } else if (this.position.x > this.target.position.x) {
                 this.direction = this.directions1
                 this.velocity.x = this.sprintspeed
                 this.mode = this.mode3
             }
         } 
         //shooting
-        else if (this.gunpoint > player.position.y && this.gunpoint < player.position.y + player.height && Math.random() <= this.shootchance && player.mode !== player.mode7 && player.mode !== player.mode8 && this.ammoamount > 0) {
+        else if (this.target !== flag1 && this.target !== flag2 && this.gunpoint > this.target.position.y && this.gunpoint < this.target.position.y + this.target.height && Math.random() <= this.shootchance && this.target.mode !== this.target.mode7 && this.target.mode !== this.target.mode8 && this.ammoamount > 0) {
             this.mode = this.mode4
             this.velocity.x = 0
-            if (player.position.x > this.position.x) {
+            if (this.target.position.x > this.position.x) {
                 this.direction = this.directions1
-            } else if (player.position.x < this.position.x ) {
+            } else if (this.target.position.x < this.position.x ) {
                 this.direction = this.directions2
             }
-            this.maxframe = 3
         } 
         //running
-        else if (player.position.x - this.sprintrange > this.position.x && Math.random() <= this.sprintchance && this.runaway === false) {
+        else if (this.target.position.x - this.sprintrange > this.position.x && Math.random() <= this.sprintchance && this.runaway === false) {
             this.direction = this.directions1
             this.velocity.x = this.sprintspeed
             this.mode = this.mode3
-        } else if (player.position.x + this.sprintrange < this.position.x && Math.random() <= this.sprintchance && this.runaway === false) {
+        } else if (this.target.position.x + this.sprintrange < this.position.x && Math.random() <= this.sprintchance && this.runaway === false) {
             this.direction = this.directions2
             this.velocity.x = -this.sprintspeed
             this.mode = this.mode3
         } 
         //walking
-        else if (player.position.x > this.position.x && Math.random() <= this.walkchance && this.runaway === false) {
+        else if (this.target.position.x > this.position.x && Math.random() <= this.walkchance && this.runaway === false) {
             this.direction = this.directions1
             this.velocity.x = this.walkspeed
             this.mode = this.mode2
-        } else if (player.position.x < this.position.x && Math.random() <= this.walkchance && this.runaway === false) {
+        } else if (this.target.position.x < this.position.x && Math.random() <= this.walkchance && this.runaway === false) {
             this.direction = this.directions2
             this.velocity.x = -this.walkspeed
             this.mode = this.mode2
         }
         
-        // jumping
-        if ((this.gunpoint > player.position.y + player.height) && this.jumped > 0 && Math.abs(this.velocity.y) <= 1 && Math.random() <= this.jumpchance && this.runaway === false) {
+        //jumping
+        if ((this.gunpoint > this.target.position.y + this.target.height) && this.jumped > 0 && Math.abs(this.velocity.y) <= 1 && Math.random() <= this.jumpchance && this.runaway === false) {
             this.velocity.y = this.jumpheight
             this.isjumping = true
             this.jumped--
@@ -216,15 +245,16 @@ class Enemy {
         } else {
             this.velocity.y += this.gravity
         }
-
+        //moveing
         this.position.x += this.velocity.x
         this.position.y += this.velocity.y
         this.sides.bottom = this.position.y + this.height;
         //delete when dead
         if (this.HP <= 0) {
             this.markedForDeletion = true
-            while (this.ammoamount > 0) {
-                this.ammoamount--
+            deadpeople.push(new Deadperson(this.position.x, this.position.y, this.direction))
+            while (this.ammoamount >= 10) {
+                this.ammoamount -= 10
                 ammos.push(new Ammo(this.position.x - 64 + Math.random() * 256, this.position.y));
             }
         }
